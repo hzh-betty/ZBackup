@@ -1,0 +1,11 @@
+[
+	{
+		"atime_" : 1742459754,
+		"fsize_" : 4499,
+		"mtime_" : 1742459754,
+		"packFlag_" : true,
+		"packPath_" : "./packdir/test.cc.snp",
+		"realPath_" : "test.cc",
+		"url_" : "/download/test.cc"
+	}
+]

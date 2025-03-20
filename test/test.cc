@@ -1,5 +1,7 @@
 #include "../util.hpp"
 #include "../config.hpp"
+#include "../data_manage.hpp"
+#include "../hot.hpp"
 // 测试util.hpp中文件的信息获取功能
 void test1(const std::string &pathname)
 {
@@ -78,20 +80,91 @@ void test6()
     std::cout << zbackup::Config::getInstance().getPort() << std::endl;
     std::cout << zbackup::Config::getInstance().getIp() << std::endl;
     std::cout << zbackup::Config::getInstance().getDownloadPrefix() << std::endl;
-    std::cout << zbackup::Config::getInstance().getPackfilePrefix() << std::endl;
+    std::cout << zbackup::Config::getInstance().getPackFilePrefix() << std::endl;
     std::cout << zbackup::Config::getInstance().getBackDir() << std::endl;
     std::cout << zbackup::Config::getInstance().getPackDir() << std::endl;
     std::cout << zbackup::Config::getInstance().getBackupFile() << std::endl;
 }
 
+// 测试文件数据的管理
+void test7(const std::string &pathname)
+{
+    zbackup::BackupInfo info;
+    info.newBackupInfo(pathname);
+    zbackup::DataManager datas;
+    datas.insert(info);
+    zbackup::BackupInfo tmp;
+    datas.getOneByURL("/download/test.cc", &tmp);
+    std::cout << tmp.mtime_ << std::endl;
+    std::cout << tmp.atime_ << std::endl;
+    std::cout << tmp.fsize_ << std::endl;
+    std::cout << tmp.packFlag_ << std::endl;
+    std::cout << tmp.realPath_ << std::endl;
+    std::cout << tmp.packPath_ << std::endl;
+    std::cout << tmp.url_ << std::endl;
+    std::cout << "--------------test getOneByURL-----------" << std::endl;
+    info.packFlag_ = true;
+    datas.update(info);
+    std::vector<zbackup::BackupInfo> arry;
+    datas.getAll(&arry);
+    for (auto &str : arry)
+    {
+        std::cout << str.mtime_ << std::endl;
+        std::cout << str.atime_ << std::endl;
+        std::cout << str.fsize_ << std::endl;
+        std::cout << str.packFlag_ << std::endl;
+        std::cout << str.realPath_ << std::endl;
+        std::cout << str.packPath_ << std::endl;
+        std::cout << str.url_ << std::endl
+                  << std::endl;
+    }
+    std::cout << "--------------test getAll-----------" << std::endl;
+
+    datas.getOneByRealPath(pathname, &tmp);
+    std::cout << tmp.mtime_ << std::endl;
+    std::cout << tmp.atime_ << std::endl;
+    std::cout << tmp.fsize_ << std::endl;
+    std::cout << tmp.packFlag_ << std::endl;
+    std::cout << tmp.realPath_ << std::endl;
+    std::cout << tmp.packPath_ << std::endl;
+    std::cout << tmp.url_ << std::endl;
+    std::cout << "--------------test getOneByRealPath-----------" << std::endl;
+}
+
+// 测试文件数据初始化读取配置文件的管理
+void test8()
+{
+    zbackup::DataManager datas;
+    zbackup::BackupInfo tmp;
+    datas.getOneByURL("/download/test.cc", &tmp);
+    std::cout << tmp.mtime_ << std::endl;
+    std::cout << tmp.atime_ << std::endl;
+    std::cout << tmp.fsize_ << std::endl;
+    std::cout << tmp.packFlag_ << std::endl;
+    std::cout << tmp.realPath_ << std::endl;
+    std::cout << tmp.packPath_ << std::endl;
+    std::cout << tmp.url_ << std::endl;
+}
+
+// 对热点文件进行判断
+zbackup::DataManager *data_ = nullptr;
+void test9()
+{
+    data_ = new zbackup::DataManager();
+    zbackup::HotManager hot;
+    hot.runModule();
+}
 int main(int argc, char *argv[])
 {
     zbackup::Log::Init();
-    //test1(argv[1]);
-    // test2(argv[1]);
-    // test3(argv[1]);
-    // test4(argv[1]);
-    // test5();
-    test6();
+    // test1(argv[1]);
+    //  test2(argv[1]);
+    //  test3(argv[1]);
+    //  test4(argv[1]);
+    //  test5();
+    // test6();
+    // test7(argv[1]);
+    // test8();
+    test9();
     return 0;
 }

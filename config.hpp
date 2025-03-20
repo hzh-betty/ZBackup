@@ -31,7 +31,7 @@ namespace zbackup
         {
             return downloadPrefix_;
         }
-        std::string getPackfilePrefix() const
+        std::string getPackFilePrefix() const
         {
             return packfilePrefix_;
         }
@@ -60,6 +60,13 @@ namespace zbackup
             // 1. 打开文件
             FileUtil fu(DEFAULT_CONFIG);
             std::string body;
+            if(fu.exists() == false)
+            {
+                logger->fatal("this config file[{}] not exists", DEFAULT_CONFIG);
+                return false;
+            }
+            logger->debug("this config file[{}] exists", DEFAULT_CONFIG);
+            
             if (fu.getContent(&body) == false)
             {
                 logger->fatal("load config file[{}] failed", DEFAULT_CONFIG);

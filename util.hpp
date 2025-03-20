@@ -1,35 +1,25 @@
 #pragma once
+#include <cstdio>
+#include <cstring>
+#include <cerrno>
 #include <iostream>
 #include <fstream>
 #include <vector>
 #include <experimental/filesystem>
 #include <string>
 #include <sys/stat.h>
-#include "../ZLog/zlog/zlog.h"
 #include <snappy.h>
 #include <jsoncpp/json/json.h>
-
-/* 实用工具类的编写 */
+#include "logger.hpp"
+/*
+    实用工具类的编写
+        文件操作
+        压缩与解压缩
+        JSON序列化与反序列化
+*/
 namespace zbackup
 {
-    zlog::Logger::ptr logger;
     namespace fs = std::experimental::filesystem;
-    class Log
-    {
-    public:
-        static void Init(zlog::LogLevel::value limitLevel = zlog::LogLevel::value::DEBUG)
-        {
-            std::unique_ptr<zlog::GlobalLoggerBuilder> builder(new zlog::GlobalLoggerBuilder());
-            builder->buildLoggerName("async_logger");
-            builder->buildLoggerLevel(limitLevel);
-            builder->buildLoggerFormmater("[%d][%f:%l][%p] %m%n");
-            builder->buildLoggerType(zlog::LoggerType::LOGGER_ASYNC);
-            builder->buildWaitTime(std::chrono::milliseconds(100));
-            builder->buildLoggerSink<zlog::StdOutSink>();
-            logger = builder->build();
-        }
-    };
-
     class FileUtil
     {
     public:
@@ -37,6 +27,23 @@ namespace zbackup
         {
         }
 
+        // 删除文件
+        bool removeFile()
+        {
+            if (exists() == false)
+            {
+                logger->debug("remove file[{}] not exits", pathname_);
+                return true;
+            }
+
+            if (remove(pathname_.c_str()) == -1)
+            {
+                logger->error("remove file[{}] falied, erro info is {}", pathname_, strerror(errno));
+                return false;
+            }
+            logger->info("remove file[{}] success", pathname_);
+            return true;
+        }
         // 获取文件大小
         int64_t getSize() const
         {
@@ -268,7 +275,7 @@ namespace zbackup
         }
 
         // 浏览目录
-        bool scanDirectory(std::vector<std::string> *arry)
+        void scanDirectory(std::vector<std::string> *arry)
         {
             for (auto &p : fs::directory_iterator(pathname_))
             {
@@ -279,7 +286,6 @@ namespace zbackup
                 arry->push_back(dir);
             }
             logger->debug("all directories has be scanned");
-            return true;
         }
 
     private:
@@ -310,7 +316,7 @@ namespace zbackup
             return true;
         }
 
-        static bool Deserialize(Json::Value *root, const std::string str)
+        static bool Deserialize(Json::Value *root, const std::string &str)
         {
             // 1. 创建一个建造类
             Json::CharReaderBuilder crb;
