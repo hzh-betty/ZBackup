@@ -1,5 +1,5 @@
 test:test.cc
-	g++ -o $@ $^ -lfmt -lpthread -lstdc++fs -lsnappy
+	g++ -o $@ $^ -std=c++14 -lfmt -lpthread -lstdc++fs -lsnappy -ljsoncpp 
 .PHONEY:clean
 clean:
 	rm -f test

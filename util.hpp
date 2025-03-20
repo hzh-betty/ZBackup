@@ -7,6 +7,7 @@
 #include <sys/stat.h>
 #include "../ZLog/zlog/zlog.h"
 #include <snappy.h>
+#include <jsoncpp/json/json.h>
 
 /* 实用工具类的编写 */
 namespace zbackup
@@ -194,7 +195,7 @@ namespace zbackup
             FileUtil fu(packname);
             if (!fu.setContent(packed))
             {
-                logger->warn("compress write packed data to[{}] failed", packname);
+                logger->error("compress write packed data to[{}] failed", packname);
                 return false;
             }
 
@@ -237,10 +238,10 @@ namespace zbackup
             FileUtil fu(filename);
             if (!fu.setContent(unpacked))
             {
-                logger->warn("uncompress write unpacked data to[{}] failed", filename);
+                logger->error("uncompress write unpacked data to[{}] failed", filename);
                 return false;
             }
-            logger->warn("uncompress write unpacked data to[{}] success", filename);
+            logger->debug("uncompress write unpacked data to[{}] success", filename);
             return true;
         }
 
@@ -283,5 +284,51 @@ namespace zbackup
 
     private:
         std::string pathname_;
+    };
+
+    class JsonUtil
+    {
+    public:
+        static bool Serialize(const Json::Value &root, std::string *str)
+        {
+            // 1. 创建一个建造类
+            Json::StreamWriterBuilder swb;
+
+            // 2. 建造一个StreamWriter类
+            std::unique_ptr<Json::StreamWriter> sw(swb.newStreamWriter());
+
+            // 3.写入
+            std::stringstream ss;
+            if (sw->write(root, &ss) != 0)
+            {
+                logger->warn("Serialize write error, error message");
+                return false;
+            }
+
+            *str = ss.str();
+            logger->debug("serialize has done");
+            return true;
+        }
+
+        static bool Deserialize(Json::Value *root, const std::string str)
+        {
+            // 1. 创建一个建造类
+            Json::CharReaderBuilder crb;
+
+            // 2. 创建一个CharReader类
+            std::unique_ptr<Json::CharReader> cr(crb.newCharReader());
+
+            // 3.读取
+            std::string err;
+            size_t len = str.size();
+            bool ret = cr->parse(str.c_str(), str.c_str() + len, root, &err);
+            if (ret == false)
+            {
+                logger->warn("Deserialize parse error, error message: {}", err);
+                return false;
+            }
+            logger->debug("deserialize has done");
+            return true;
+        }
     };
 }; // namespace zbackup
