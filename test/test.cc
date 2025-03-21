@@ -1,7 +1,8 @@
-#include "../util.hpp"
-#include "../config.hpp"
-#include "../data_manage.hpp"
-#include "../hot.hpp"
+#include "../zbackup/util.hpp"
+#include "../zbackup/config.hpp"
+#include "../zbackup/data_manage.hpp"
+#include "../zbackup/hot.hpp"
+#include "../zbackup/server.hpp"
 // 测试util.hpp中文件的信息获取功能
 void test1(const std::string &pathname)
 {
@@ -150,13 +151,30 @@ void test8()
 zbackup::DataManager *data_ = nullptr;
 void test9()
 {
-    data_ = new zbackup::DataManager();
     zbackup::HotManager hot;
     hot.runModule();
 }
+
+// 测试文件上传
+void test10()
+{
+    zbackup::Service server;
+    server.run();
+}
+
+// 服务端所有功能的测试
+void test11()
+{
+    std::thread thread_hot_manager(test9);
+    std::thread thread_service(test10);
+    thread_hot_manager.join();
+    thread_service.join();
+}
+
 int main(int argc, char *argv[])
 {
-    zbackup::Log::Init();
+    zbackup::Log::Init(zlog::LogLevel::value::WARNING);
+    data_ = new zbackup::DataManager();
     // test1(argv[1]);
     //  test2(argv[1]);
     //  test3(argv[1]);
@@ -165,6 +183,8 @@ int main(int argc, char *argv[])
     // test6();
     // test7(argv[1]);
     // test8();
-    test9();
+    // test9();
+    //test10();
+    test11();
     return 0;
 }

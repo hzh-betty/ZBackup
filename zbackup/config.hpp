@@ -2,7 +2,7 @@
 #include "util.hpp"
 namespace zbackup
 {
-    static const std::string DEFAULT_CONFIG = "../backup.conf";
+    static const std::string DEFAULT_CONFIG = "./backup.conf";
     class Config
     {
     public:
@@ -60,13 +60,11 @@ namespace zbackup
             // 1. 打开文件
             FileUtil fu(DEFAULT_CONFIG);
             std::string body;
-            if(fu.exists() == false)
+            if (fu.exists() == false)
             {
                 logger->fatal("this config file[{}] not exists", DEFAULT_CONFIG);
                 return false;
             }
-            logger->debug("this config file[{}] exists", DEFAULT_CONFIG);
-            
             if (fu.getContent(&body) == false)
             {
                 logger->fatal("load config file[{}] failed", DEFAULT_CONFIG);
@@ -93,6 +91,23 @@ namespace zbackup
             backDir_ = value["back_dir"].asString();
             backupFile_ = value["backup_file"].asString();
             logger->debug("load config file[{}] success", DEFAULT_CONFIG);
+
+            
+            // 4. 创建备份与压缩目录
+            FileUtil tmp1(backDir_);
+            FileUtil tmp2(packDir_);
+            if (!tmp1.createDirectory())
+            {
+                logger->error("readConfigFile create backup dir[{}] failed", backDir_);
+                return false;
+            }
+            if (!tmp2.createDirectory())
+            {
+                logger->error("readConfigFile create pack dir[{}] failed", backDir_);
+                return false;
+            }
+
+            logger->info("read config file success", DEFAULT_CONFIG);
             return true;
         }
 

@@ -18,18 +18,6 @@ namespace zbackup
             packDir_ = config.getPackDir();
             packSuffix_ = config.getPackFilePrefix();
             hotTime_ = config.getHotTime();
-            FileUtil tmp1(backDir_);
-            FileUtil tmp2(packDir_);
-            if (!tmp1.createDirectory())
-            {
-                logger->error("HotManager create back dir[{}] failed", backDir_);
-                return;
-            }
-            if (!tmp2.createDirectory())
-            {
-                logger->error("HotManager create pack dir[{}] failed", backDir_);
-                return;
-            }
             logger->info("HotManager init success");
         }
 
@@ -41,6 +29,7 @@ namespace zbackup
                 FileUtil fu(backDir_);
                 std::vector<std::string> arry;
                 fu.scanDirectory(&arry);
+                logger->debug("HotManager runModule scan directory succsess");
 
                 // 2. 判断是否为热点文件
                 for (auto &str : arry)
@@ -79,10 +68,10 @@ namespace zbackup
             time_t curTime = time(nullptr);
             if (curTime - lastAtime > hotTime_)
             {
-                logger->debug("file[{}] is hot", filename);
+                logger->info("file[{}] is hot", filename);
                 return true;
             }
-            logger->debug("file[{}] is not hot", filename);
+            logger->info("file[{}] is not hot", filename);
             return false;
         }
 

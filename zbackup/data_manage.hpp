@@ -62,9 +62,15 @@ namespace zbackup
             {
                 WriteGuard wlock(&rwMutex_);
                 tables_[info.url_] = info;
-                logger->info("insert info by url[{}] success", info.url_);
+                logger->debug("insert info by url[{}] success", info.url_);
             }
-            storage();
+            if(storage() == false)
+            {
+                logger->error("insert storage falied");
+                return false;
+            }
+
+            logger->debug("insert success");
             return true;
         }
 
@@ -74,9 +80,14 @@ namespace zbackup
             {
                 WriteGuard wlock(&rwMutex_);
                 tables_[info.url_] = info;
-                logger->info("update info by url[{}] success", info.url_);
+                logger->debug("update info by url[{}] success", info.url_);
             }
-            storage();
+            if(storage() == false)
+            {
+                logger->error("update storage falied");
+                return false;
+            }
+            logger->debug("update success");
             return true;
         }
 
@@ -112,7 +123,7 @@ namespace zbackup
             return false;
         }
 
-        bool getAll(std::vector<BackupInfo> *arry)
+        void getAll(std::vector<BackupInfo> *arry)
         {
             ReadGuard rlock(&rwMutex_);
             auto iter = tables_.begin();
@@ -121,34 +132,39 @@ namespace zbackup
                 arry->push_back(iter->second);
             }
             logger->info("get all info success");
-            return true;
         }
 
     private:
-        bool InitLoad()
+        void InitLoad()
         {
-            // 1. 将数据文件中的读取
+            // 1. 如果存储文件不存在就创建
             FileUtil fu(backupFile_);
-            if (!fu.exists())
+            if (fu.exists() == false)
             {
-                logger->info("init load backupFile[{}] not exists", backupFile_);
-                return true;
+                if (!fu.createFile())
+                {
+                    logger->fatal("backup file[{}] cannot be created", backupFile_);
+                    return;
+                }
+                logger->debug("backup file[{}] be created", backupFile_);
+                return;
             }
-            logger->debug("init load backupFile[{}] exists", backupFile_);
+
+            // 2. 将数据文件中数据的读取
             std::string body;
             if (fu.getContent(&body) == false)
             {
                 logger->fatal("init load get file[{}] content failed", backupFile_);
-                return false;
+                return;
             }
             logger->debug("init load get file[{}] content success", backupFile_);
 
-            // 2.反序列化
+            // 3.反序列化
             Json::Value root;
             JsonUtil::Deserialize(&root, body);
             logger->debug("init load Deserialize success");
 
-            // 3.将反序列化好的数据添加进tables_
+            // 4.将反序列化好的数据添加进tables_
             for (int i = 0; i < root.size(); i++)
             {
                 BackupInfo info;
@@ -161,7 +177,6 @@ namespace zbackup
                 info.url_ = root[i]["url_"].asString();
                 insert(info);
             }
-            return true;
         }
 
         // 将信息持久化保存
@@ -170,7 +185,7 @@ namespace zbackup
             // 1. 获取所有数据
             std::vector<BackupInfo> array;
             getAll(&array);
-            logger->info("storage get all info success");
+            logger->debug("storage get all info success");
 
             // 2. 添加到Json::Value
             Json::Value root;
@@ -186,18 +201,27 @@ namespace zbackup
                 item["url_"] = array[i].url_;
                 root.append(item);
             }
-            logger->info("add all info success into json");
+            logger->debug("storage add all info success into json");
 
             // 3. 序列化
             std::string body;
-            JsonUtil::Serialize(root, &body);
-            logger->info("serialize all storage info success");
+            if (JsonUtil::Serialize(root, &body) == false)
+            {
+                logger->error("serialize all storage info failed");
+                return false;
+            }
+            logger->debug("serialize all storage info success");
 
             // 4. 写文件
             FileUtil fu(backupFile_);
-            fu.setContent(body);
-            logger->info("storage info write to file[{}]", backupFile_);
+            if (fu.setContent(body) == false)
+            {
+                logger->error("storage info write to file[{}] failed ", backupFile_);
+                return false;
+            }
+            logger->debug("storage info write to file[{}] success", backupFile_);
 
+            logger->info("The file was storaged successfully");
             return true;
         }
 

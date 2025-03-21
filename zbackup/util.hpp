@@ -30,12 +30,14 @@ namespace zbackup
         // 删除文件
         bool removeFile()
         {
+            // 1. 判断文件是否存在
             if (exists() == false)
             {
                 logger->debug("remove file[{}] not exits", pathname_);
                 return true;
             }
 
+            // 2. 删除指定文件
             if (remove(pathname_.c_str()) == -1)
             {
                 logger->error("remove file[{}] falied, erro info is {}", pathname_, strerror(errno));
@@ -44,6 +46,7 @@ namespace zbackup
             logger->info("remove file[{}] success", pathname_);
             return true;
         }
+
         // 获取文件大小
         int64_t getSize() const
         {
@@ -54,7 +57,7 @@ namespace zbackup
                 return -1;
             }
 
-            logger->debug("get file[{}] size success", pathname_);
+            logger->info("get file[{}] size success", pathname_);
             return st.st_size;
         }
 
@@ -68,7 +71,7 @@ namespace zbackup
                 return -1;
             }
 
-            logger->debug("get file[{}] last modify time success", pathname_);
+            logger->info("get file[{}] last modify time success", pathname_);
             return st.st_mtime;
         }
 
@@ -82,7 +85,7 @@ namespace zbackup
                 return -1;
             }
 
-            logger->debug("get file[{}] last access time success", pathname_);
+            logger->info("get file[{}] last access time success", pathname_);
             return st.st_atime;
         }
 
@@ -101,7 +104,7 @@ namespace zbackup
                 filename = pathname_.substr(pos + 1);
             }
 
-            logger->debug("get file[{}] name success", filename);
+            logger->info("get file[{}] name success", filename);
             return filename;
         }
 
@@ -109,6 +112,12 @@ namespace zbackup
         bool getPosLen(std::string *body, size_t pos, size_t len)
         {
             // 1. 判断是否合法
+            if(exists() == false)
+            {
+                logger->warn("this file[{}] not exists", pathname_);
+                return false;
+            }
+
             int64_t fsize = getSize();
             if (pos + len > fsize)
             {
@@ -138,7 +147,7 @@ namespace zbackup
                 return false;
             }
 
-            logger->debug("read file[{}] content success", pathname_);
+            logger->info("read file[{}] content success", pathname_);
             ifs.close();
             return true;
         }
@@ -157,7 +166,7 @@ namespace zbackup
             ofs.open(pathname_, std::ios::out | std::ios::binary);
             if (!ofs.is_open())
             {
-                logger->error("write open file[{}] failed", pathname_);
+                logger->warn("write open file[{}] failed", pathname_);
                 return false;
             }
             logger->debug("write open file[{}] success", pathname_);
@@ -170,7 +179,8 @@ namespace zbackup
                 ofs.close();
                 return false;
             }
-            logger->debug("write file[{}] content success", pathname_);
+
+            logger->info("write file[{}] content success", pathname_);
             ofs.close();
             return true;
         }
@@ -206,7 +216,7 @@ namespace zbackup
                 return false;
             }
 
-            logger->debug("compress write packed data to[{}] success", packname);
+            logger->info("compress write packed data to[{}] success", packname);
             return true;
         }
 
@@ -248,7 +258,7 @@ namespace zbackup
                 logger->error("uncompress write unpacked data to[{}] failed", filename);
                 return false;
             }
-            logger->debug("uncompress write unpacked data to[{}] success", filename);
+            logger->info("uncompress write unpacked data to[{}] success", filename);
             return true;
         }
 
@@ -256,7 +266,18 @@ namespace zbackup
         {
             return fs::exists(pathname_);
         }
-
+        bool createFile()
+        {
+            std::ofstream createFile(pathname_);
+            if (createFile.is_open() == false)
+            {
+                logger->fatal("create file[{}] open failed", pathname_);
+                return false;
+            }
+            createFile.close();
+            logger->info("create file[{}] success", pathname_);
+            return true;
+        }
         // 创建目录
         bool createDirectory()
         {
@@ -269,7 +290,7 @@ namespace zbackup
             }
             else
             {
-                logger->debug("create directories[{}] success", pathname_);
+                logger->info("create directories[{}] success", pathname_);
             }
             return ret;
         }
@@ -285,7 +306,7 @@ namespace zbackup
                 logger->debug("[{}] is be scanned", dir);
                 arry->push_back(dir);
             }
-            logger->debug("all directories has be scanned");
+            logger->info("all directories has be scanned");
         }
 
     private:
@@ -312,7 +333,7 @@ namespace zbackup
             }
 
             *str = ss.str();
-            logger->debug("serialize has done");
+            logger->info("serialize has done");
             return true;
         }
 
@@ -330,10 +351,11 @@ namespace zbackup
             bool ret = cr->parse(str.c_str(), str.c_str() + len, root, &err);
             if (ret == false)
             {
-                logger->warn("Deserialize parse error, error message: {}", err);
+                logger->warn("Deserialize parse error", err);
+                logger->warn("error message is {}",err);
                 return false;
             }
-            logger->debug("deserialize has done");
+            logger->info("deserialize has done");
             return true;
         }
     };

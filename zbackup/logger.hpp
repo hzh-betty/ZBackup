@@ -1,5 +1,5 @@
 #pragma once
-#include "../ZLog/zlog/zlog.h"
+#include "../zlog/zlog.h"
 namespace zbackup
 {
     zlog::Logger::ptr logger;
@@ -11,7 +11,7 @@ namespace zbackup
             std::unique_ptr<zlog::GlobalLoggerBuilder> builder(new zlog::GlobalLoggerBuilder());
             builder->buildLoggerName("async_logger");
             builder->buildLoggerLevel(limitLevel);
-            builder->buildLoggerFormmater("[%d][%f:%l]%T[%p] %m%n");
+            builder->buildLoggerFormmater("[%t][%d][%f:%l]%T[%p] %m%n");
             // builder->buildLoggerType(zlog::LoggerType::LOGGER_ASYNC);
             // builder->buildWaitTime(std::chrono::milliseconds(100));
             builder->buildLoggerSink<zlog::StdOutSink>();
