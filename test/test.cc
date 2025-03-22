@@ -1,8 +1,8 @@
-#include "../zbackup/util.hpp"
-#include "../zbackup/config.hpp"
-#include "../zbackup/data_manage.hpp"
-#include "../zbackup/hot.hpp"
-#include "../zbackup/server.hpp"
+#include "../server/util.hpp"
+#include "../server/config.hpp"
+#include "../server/data_manage.hpp"
+#include "../server/hot.hpp"
+#include "../server/server.hpp"
 // 测试util.hpp中文件的信息获取功能
 void test1(const std::string &pathname)
 {

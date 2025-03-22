@@ -44,7 +44,7 @@ namespace zbackup
             etag += std::to_string(info.fsize_);
             etag += "-";
             etag += std::to_string(info.mtime_);
-            logger->debug("get etag {}", etag);
+            logger->debug("create ETag {}", etag);
             return etag;
         }
 
@@ -109,7 +109,7 @@ namespace zbackup
             }
             else // httlplib支持断点续传
             {
-                // std::string  range = req.get_header_val("If-Range"); bytes=start-end
+                // std::string range = req.get_header_val("Range"); bytes start-end
                 // rsp.set_header("Content-Range", "bytes start-end/fsize");
                 rsp.status = 206; // 区间请求响应的是206
                 logger->info("download breakpoint resumption success");

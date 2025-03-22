@@ -9,7 +9,7 @@ namespace zbackup
         static void Init(zlog::LogLevel::value limitLevel = zlog::LogLevel::value::DEBUG)
         {
             std::unique_ptr<zlog::GlobalLoggerBuilder> builder(new zlog::GlobalLoggerBuilder());
-            builder->buildLoggerName("async_logger");
+            builder->buildLoggerName("server_logger");
             builder->buildLoggerLevel(limitLevel);
             builder->buildLoggerFormmater("[%t][%d][%f:%l]%T[%p] %m%n");
             // builder->buildLoggerType(zlog::LoggerType::LOGGER_ASYNC);

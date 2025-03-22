@@ -92,7 +92,6 @@ namespace zbackup
             backupFile_ = value["backup_file"].asString();
             logger->debug("load config file[{}] success", DEFAULT_CONFIG);
 
-            
             // 4. 创建备份与压缩目录
             FileUtil tmp1(backDir_);
             FileUtil tmp2(packDir_);

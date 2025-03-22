@@ -53,7 +53,7 @@ namespace zbackup
         DataManager()
         {
             backupFile_ = Config::getInstance().getBackupFile();
-            InitLoad();
+            initLoad();
         }
 
         // 添加备份信息
@@ -135,7 +135,7 @@ namespace zbackup
         }
 
     private:
-        void InitLoad()
+        bool initLoad()
         {
             // 1. 如果存储文件不存在就创建
             FileUtil fu(backupFile_);
@@ -144,10 +144,10 @@ namespace zbackup
                 if (!fu.createFile())
                 {
                     logger->fatal("backup file[{}] cannot be created", backupFile_);
-                    return;
+                    return false;
                 }
                 logger->debug("backup file[{}] be created", backupFile_);
-                return;
+                return true;
             }
 
             // 2. 将数据文件中数据的读取
@@ -155,7 +155,7 @@ namespace zbackup
             if (fu.getContent(&body) == false)
             {
                 logger->fatal("init load get file[{}] content failed", backupFile_);
-                return;
+                return false;
             }
             logger->debug("init load get file[{}] content success", backupFile_);
 
@@ -177,6 +177,8 @@ namespace zbackup
                 info.url_ = root[i]["url_"].asString();
                 insert(info);
             }
+
+            return true;
         }
 
         // 将信息持久化保存
