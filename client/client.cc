@@ -3,7 +3,7 @@
 #include "client.hpp"
 
 #define BACKUP_FILE "./backup.dat"
-#define BACKUP_DIR "./backup/"
+#define BACKUP_DIR "./backup"
 int main()
 {
     zbackup::Log::Init(zlog::LogLevel::value::WARNING);

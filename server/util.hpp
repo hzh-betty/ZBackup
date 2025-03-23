@@ -2,15 +2,12 @@
 #include <cstdio>
 #include <cstring>
 #include <cerrno>
-#include <iostream>
 #include <fstream>
-#include <vector>
-#include <experimental/filesystem>
-#include <string>
+#include <filesystem>
 #include <sys/stat.h>
-#include <snappy.h>
 #include <jsoncpp/json/json.h>
 #include "logger.hpp"
+
 /*
     实用工具类的编写
         文件操作
@@ -19,7 +16,7 @@
 */
 namespace zbackup
 {
-    namespace fs = std::experimental::filesystem;
+    namespace fs = std::filesystem;
     class FileUtil
     {
     public:
@@ -185,87 +182,11 @@ namespace zbackup
             return true;
         }
 
-        // 压缩文件（使用Snappy实现）
-        bool compress(const std::string &packname)
-        {
-            std::string body;
-            if (!getContent(&body)) // 获取原始文件数据
-            {
-                logger->warn("compress get file[{}] content failed", pathname_);
-                return false;
-            }
-            logger->debug("compress get file[{}] content success", pathname_);
-
-            // 1. 预分配
-            std::string packed;
-            packed.resize(body.size());
-
-            // 2. 执行压缩
-            if (!snappy::Compress(body.data(), body.size(), &packed))
-            {
-                logger->error("compress file[{}] failed", pathname_);
-                return false;
-            }
-            logger->debug("compress file[{}] success", pathname_);
-
-            // 3. 写入压缩文件
-            FileUtil fu(packname);
-            if (!fu.setContent(packed))
-            {
-                logger->error("compress write packed data to[{}] failed", packname);
-                return false;
-            }
-
-            logger->info("compress write packed data to[{}] success", packname);
-            return true;
-        }
-
-        // 解压文件（使用Snappy实现）
-        bool unCompress(const std::string &filename)
-        {
-            std::string body;
-            if (!getContent(&body)) // 获取压缩文件数据
-            {
-                logger->warn("uncompress get file[{}] content failed", pathname_);
-                return false;
-            }
-            logger->debug("uncompress get file[{}] content success", pathname_);
-
-            // 1. 预分配解压缓冲区（需提前知道原始数据长度，此处假设压缩数据包含长度信息）
-            size_t uncompressed_len = 0;
-            if (!snappy::GetUncompressedLength(body.data(), body.size(), &uncompressed_len))
-            {
-                logger->error("uncompress get original length failed");
-                return false;
-            }
-            logger->debug("uncompress get original length success");
-
-            std::string unpacked;
-            unpacked.resize(uncompressed_len);
-
-            // 2. 执行解压
-            if (!snappy::Uncompress(body.data(), body.size(), &unpacked))
-            {
-                logger->error("uncompress file[{}] failed", filename);
-                return false;
-            }
-            logger->debug("uncompress file[{}] success", filename);
-
-            // 3. 写入解压文件
-            FileUtil fu(filename);
-            if (!fu.setContent(unpacked))
-            {
-                logger->error("uncompress write unpacked data to[{}] failed", filename);
-                return false;
-            }
-            logger->info("uncompress write unpacked data to[{}] success", filename);
-            return true;
-        }
-
         bool exists()
         {
             return fs::exists(pathname_);
         }
+        
         bool createFile()
         {
             std::ofstream createFile(pathname_);
@@ -351,7 +272,7 @@ namespace zbackup
             bool ret = cr->parse(str.c_str(), str.c_str() + len, root, &err);
             if (ret == false)
             {
-                logger->warn("Deserialize parse error", err);
+                logger->warn("Deserialize parse error");
                 logger->warn("error message is {}",err);
                 return false;
             }

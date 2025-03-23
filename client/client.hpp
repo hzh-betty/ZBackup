@@ -81,6 +81,11 @@ namespace zbackup
             {
                 // 1. 遍历获取指定文件夹中所有文件
                 FileUtil fu(backDir_);
+                if(fu.exists() == false)
+                {
+                    fu.createDirectory();
+                    continue;
+                }
                 std::vector<std::string> arry;
                 fu.scanDirectory(&arry);
                 // 2. 逐个判断文件是否需要上传
@@ -90,13 +95,13 @@ namespace zbackup
                     {
                         continue;
                     }
-                    // 3. 如果需需要上传则上传文件
+                    // 3. 如果需要上传则上传文件
                     if (upload(a) == true)
                     {
                         data_->insert(a, getFileIdentifier(a)); // 新增文件备份信息
                     }
                 }
-                std::this_thread::sleep_for(std::chrono::milliseconds(100));
+                std::this_thread::sleep_for(std::chrono::milliseconds(1000));
             }
         }
 

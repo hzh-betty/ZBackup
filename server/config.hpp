@@ -2,7 +2,7 @@
 #include "util.hpp"
 namespace zbackup
 {
-    static const std::string DEFAULT_CONFIG = "./backup.conf";
+    static const std::string DEFAULT_CONFIG = "./config.json";
     class Config
     {
     public:
@@ -74,7 +74,7 @@ namespace zbackup
 
             // 2. 反序列化
             Json::Value value;
-            if (!JsonUtil::Deserialize(&value, body))
+            if (JsonUtil::Deserialize(&value, body) == false)
             {
                 logger->fatal("deserialize config file[{}] failed", DEFAULT_CONFIG);
                 return false;

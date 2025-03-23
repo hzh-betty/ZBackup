@@ -1,4 +1,5 @@
 #include "../server/util.hpp"
+#include "../server/compress.hpp"
 #include "../server/config.hpp"
 #include "../server/data_manage.hpp"
 #include "../server/hot.hpp"
@@ -27,12 +28,10 @@ void test2(const std::string &pathname)
 // 测试util.hpp中压缩文件的功能
 void test3(const std::string &pathname)
 {
-    zbackup::FileUtil fh(pathname);
     std::string packed = pathname + ".snappy";
-    fh.compress(packed);
-
-    zbackup::FileUtil fu(packed);
-    fu.unCompress(pathname + "-1");
+    zbackup::Compress *comp = new zbackup::SnappyCompress(pathname);
+    comp->compress(packed);
+    comp->unCompress(packed);
 }
 
 // 测试util.hpp中创建与浏览目录的功能
@@ -92,7 +91,7 @@ void test7(const std::string &pathname)
 {
     zbackup::BackupInfo info;
     info.newBackupInfo(pathname);
-    zbackup::DataManager datas;
+    zbackup::DataManager &datas = zbackup::DataManager::getInstance();
     datas.insert(info);
     zbackup::BackupInfo tmp;
     datas.getOneByURL("/download/test.cc", &tmp);
@@ -135,7 +134,7 @@ void test7(const std::string &pathname)
 // 测试文件数据初始化读取配置文件的管理
 void test8()
 {
-    zbackup::DataManager datas;
+    zbackup::DataManager &datas = zbackup::DataManager::getInstance();
     zbackup::BackupInfo tmp;
     datas.getOneByURL("/download/test.cc", &tmp);
     std::cout << tmp.mtime_ << std::endl;
@@ -152,7 +151,7 @@ zbackup::DataManager *data_ = nullptr;
 void test9()
 {
     zbackup::HotManager hot;
-    hot.runModule();
+    hot.run();
 }
 
 // 测试文件上传
@@ -174,7 +173,6 @@ void test11()
 int main(int argc, char *argv[])
 {
     zbackup::Log::Init(zlog::LogLevel::value::WARNING);
-    data_ = new zbackup::DataManager();
     // test1(argv[1]);
     //  test2(argv[1]);
     //  test3(argv[1]);
@@ -184,7 +182,7 @@ int main(int argc, char *argv[])
     // test7(argv[1]);
     // test8();
     // test9();
-    //test10();
+    // test10();
     test11();
     return 0;
 }
