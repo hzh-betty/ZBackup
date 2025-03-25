@@ -128,8 +128,7 @@ public:
     static ThreadPool *getInstance()
     {
         // once_flag与call_once保证单例只执行一次
-        static std::once_flag flag;
-        std::call_once(flag, []()
+        std::call_once(_flag, []()
                        { _instance.reset(new ThreadPool()); });
         return _instance.get();
     }
@@ -197,56 +196,6 @@ public:
 
         return result; // 返回任务的future对象
     }
-
-    // 动态调整线程池大小
-    void adjustPoolSize(size_t newMaxThreadNums)
-    {
-        checkDataRange(newMaxThreadNums);
-
-        // 1. 增加线程池大小，启动新的线程
-        std::lock_guard<std::mutex> lock(_mtx); // 锁住线程池
-
-        if (_poolMode == PoolMode::MODE_FIXED)
-        {
-            std::cerr << "Mode is MODE_FIXED, can not adjustPoolSize !" << std::endl;
-            return;
-        }
-
-        if (newMaxThreadNums > _maxThreadNums)
-        {
-            for (size_t i = _curThreadNums; i < newMaxThreadNums; i++)
-            {
-                launchExThread();
-            }
-        }
-        // 2. 减少线程池大小，标记空闲线程为退出
-        else if (newMaxThreadNums < _maxThreadNums)
-        {
-            // 不能减小到默认数量以下
-            if (newMaxThreadNums < DEFAULT_THREAD_NUM)
-            {
-                std::cerr << "In cached mode, the minimum number of threads is " << DEFAULT_THREAD_NUM << std::endl;
-                newMaxThreadNums = DEFAULT_THREAD_NUM;
-            }
-
-            size_t threadsToRemove = _curThreadNums - newMaxThreadNums;
-            for (auto iter = _excuteThreads.begin(); iter != _excuteThreads.end() && threadsToRemove > 0;)
-            {
-                if (iter->second->_isIdle && threadsToRemove > 0 &&
-                    iter->second->_shouldExit == false)
-                {
-                    iter->second->_shouldExit = true;
-                    --threadsToRemove;
-                }
-                else
-                {
-                    ++iter;
-                }
-            }
-        }
-        _maxThreadNums = newMaxThreadNums; // 更新最大线程数
-    }
-
 private:
     // 构造函数，初始化线程池
     ThreadPool() = default;
@@ -413,6 +362,8 @@ private:
     std::unique_ptr<MonitorThread> _monitorThread;                              // 监视空闲线程
     std::queue<ThreadId> _timeOutQueue;                                         // 超时线程队列
     static std::unique_ptr<ThreadPool, void (*)(ThreadPool *)> _instance;       // 线程池单例
+    static std::once_flag _flag;
 };
+std::once_flag ThreadPool::_flag;
 std::unique_ptr<ThreadPool, void (*)(ThreadPool *)> ThreadPool::_instance(nullptr, [](ThreadPool *ptr)
                                                                           { delete ptr; });
