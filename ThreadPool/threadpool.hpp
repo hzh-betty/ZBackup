@@ -7,8 +7,10 @@
 #include <functional>
 #include <queue>
 #include <future>
+#include"../zlog/zlog.h"
 #include <chrono>
 #include <memory>
+
 
 // 默认配置常量
 static const size_t DEFAULT_THREAD_NUM = std::thread::hardware_concurrency();   // 默认线程数量
