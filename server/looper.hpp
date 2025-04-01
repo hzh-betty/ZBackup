@@ -13,6 +13,7 @@ namespace zbackup
             : stop_(false),
               dataManager_(std::make_shared<DataManager>(storage)), comp_(comp)
         {
+            // 加入线程池统一进行处理
             ThreadPool::getInstance()->submitTask([this]()
                                                   { hotMonitor(); });
         }
@@ -171,6 +172,7 @@ namespace zbackup
             stop_ = true;
         }
 
+    private:
         void hotMonitor()
         {
             Config &config = Config::getInstance();
@@ -196,7 +198,6 @@ namespace zbackup
             }
         }
 
-    private:
         void dealTask(const std::string &str)
         {
             // 3. 获取文件信息
