@@ -10,9 +10,11 @@ namespace zbackup
     public:
         using ptr = std::shared_ptr<BackupLooper>;
         BackupLooper(Compress::ptr comp, Storage::ptr storage)
-            : stop_(false), hotThread_(std::thread(&BackupLooper::hotMonitor, this)),
+            : stop_(false),
               dataManager_(std::make_shared<DataManager>(storage)), comp_(comp)
         {
+            ThreadPool::getInstance()->submitTask([this]()
+                                                  { hotMonitor(); });
         }
 
         void download(const httplib::Request &req, httplib::Response &rsp)
@@ -167,10 +169,8 @@ namespace zbackup
         ~BackupLooper()
         {
             stop_ = true;
-            hotThread_.join();
         }
 
-    private:
         void hotMonitor()
         {
             Config &config = Config::getInstance();
@@ -195,6 +195,8 @@ namespace zbackup
                 std::this_thread::sleep_for(std::chrono::milliseconds(1000));
             }
         }
+
+    private:
         void dealTask(const std::string &str)
         {
             // 3. 获取文件信息
@@ -259,7 +261,6 @@ namespace zbackup
 
     private:
         std::atomic<bool> stop_;
-        std::thread hotThread_;
         DataManager::ptr dataManager_;
         Compress::ptr comp_;
     };

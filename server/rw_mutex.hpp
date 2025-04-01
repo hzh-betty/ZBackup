@@ -63,15 +63,15 @@ namespace zbackup
         {
             rMutex_->rUnLock();
         }
+
     private:
         RWMutex *rMutex_;
     };
 
-    
     class WriteGuard
     {
     public:
-    WriteGuard(RWMutex *wMutex)
+        WriteGuard(RWMutex *wMutex)
             : wMutex_(wMutex)
         {
             wMutex_->wLock();
@@ -80,6 +80,7 @@ namespace zbackup
         {
             wMutex_->wUnLock();
         }
+
     private:
         RWMutex *wMutex_;
     };
