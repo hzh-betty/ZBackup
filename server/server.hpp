@@ -2,6 +2,9 @@
 #include "looper.hpp"
 #include "compress.hpp"
 #include "storage.hpp"
+#include "handler/download_handler.hpp"
+#include "handler/listshow_handler.hpp"
+#include "handler/upload_handler.hpp"
 #include <memory>
 #include <functional>
 #include "../ZHttpServer/include/http/http_server.h"
@@ -12,9 +15,13 @@ namespace zbackup
     {
     public:
         using ptr = std::shared_ptr<BackupServer>;
+        
         BackupServer(Compress::ptr comp, Storage::ptr storage)
-            : looper_(std::make_shared<BackupLooper>(comp, storage))
+            : looper_(std::make_shared<BackupLooper>(comp))
         {
+            // 初始化 DataManager 单例
+            DataManager::getInstance(storage);
+            
             Config &config = Config::getInstance();
             serverPort_ = config.getPort();
             serverIp_ = config.getIp();
@@ -27,27 +34,22 @@ namespace zbackup
             builder->build_name("BackupServer");
             builder->build_thread_num(4);
             server_ = builder->build();
+
+            // 创建处理器
+            uploadHandler_ = std::make_shared<UploadHandler>(comp);
+            listShowHandler_ = std::make_shared<ListShowHandler>(comp);
+            downloadHandler_ = std::make_shared<DownloadHandler>(comp);
         }
 
         void run()
         {
-            // 适配器，将ZHttpServer的回调转为原有逻辑
-            auto upload = [this](const zhttp::HttpRequest &req, zhttp::HttpResponse *rsp) {
-
-                looper_->upload(req, *rsp);
-            };
-            auto listshow = [this](const zhttp::HttpRequest &req, zhttp::HttpResponse *rsp) {
-                looper_->listshow(req, *rsp);
-            };
-            auto download = [this](const zhttp::HttpRequest &req, zhttp::HttpResponse *rsp) {
-                looper_->download(req, *rsp);
-            };
-
-            server_->Post("/upload", upload);
-            server_->Get("/listshow", listshow);
-            server_->Get("/", listshow);
+            // 注册处理器
+            server_->Post("/upload", uploadHandler_);
+            server_->Get("/listshow", listShowHandler_);
+            server_->Get("/", listShowHandler_);
+            
             std::string downloadUrl = downloadPrefix_ + "(.*)";
-            server_->Get(downloadUrl, download);
+            server_->add_regex_route(zhttp::HttpRequest::Method::GET, downloadUrl, downloadHandler_);
 
             logger->info("BackupServer starting on port {}", serverPort_);
             server_->start();
@@ -59,5 +61,11 @@ namespace zbackup
         std::string downloadPrefix_;
         std::unique_ptr<zhttp::HttpServer> server_;
         BackupLooper::ptr looper_;
+    
+        private:
+        // 处理器
+        std::shared_ptr<UploadHandler> uploadHandler_;
+        std::shared_ptr<ListShowHandler> listShowHandler_;
+        std::shared_ptr<DownloadHandler> downloadHandler_;
     };
 };

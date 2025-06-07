@@ -82,7 +82,7 @@ namespace zbackup
                 return -1;
             }
 
-            logger->info("get file[{}] last access time success", pathname_);
+            logger->debug("get file[{}] last access time success", pathname_);
             return st.st_atime;
         }
 
@@ -227,7 +227,7 @@ namespace zbackup
                 logger->debug("[{}] is be scanned", dir);
                 arry->push_back(dir);
             }
-            logger->info("all directories has be scanned");
+            logger->debug("all directories has be scanned");
         }
 
     private:

@@ -14,12 +14,9 @@ find_package(OpenSSL REQUIRED)
 find_package(fmt REQUIRED)
 find_package(nlohmann_json 3.2.0 REQUIRED)
 
-# 递归收集server和client源码（支持.cpp和.cc）
+# 递归收集server和（支持.cpp和.cc）
 file(GLOB_RECURSE SERVER_SRC
     ${CMAKE_SOURCE_DIR}/server/*.cc
-)
-file(GLOB_RECURSE CLIENT_SRC
-    ${CMAKE_SOURCE_DIR}/client/*.cc
 )
 
 # server可执行文件
@@ -36,18 +33,6 @@ target_link_libraries(backup_server
     Threads::Threads
     OpenSSL::SSL
     OpenSSL::Crypto
-    snappy
-)
-
-# client可执行文件
-add_executable(backup_client ${CLIENT_SRC})
-target_include_directories(backup_client PRIVATE
-    ${CMAKE_SOURCE_DIR}/client
-)
-target_link_libraries(backup_client
-    fmt::fmt
-    nlohmann_json::nlohmann_json
-    Threads::Threads
     snappy
 )
 
