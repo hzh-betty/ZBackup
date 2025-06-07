@@ -1,8 +1,10 @@
 #pragma once
 #include "util.hpp"
+#include <filesystem>
 namespace zbackup
 {
-    static const std::string DEFAULT_CONFIG = "./config.json";
+    // 使用绝对路径，确保无论在哪启动都能找到
+    static const std::string DEFAULT_CONFIG = "../config/config.json";
     class Config
     {
     public:
@@ -73,7 +75,7 @@ namespace zbackup
             logger->debug("load config file[{}] success", DEFAULT_CONFIG);
 
             // 2. 反序列化
-            Json::Value value;
+            nlohmann::json value;
             if (JsonUtil::Deserialize(&value, body) == false)
             {
                 logger->fatal("deserialize config file[{}] failed", DEFAULT_CONFIG);
@@ -82,14 +84,14 @@ namespace zbackup
             logger->debug("deserialize config file[{}] success", DEFAULT_CONFIG);
 
             // 3.填写配置信息
-            hotTime_ = value["hot_time"].asInt();
-            serverPort_ = value["server_port"].asInt();
-            serverip_ = value["server_ip"].asString();
-            downloadPrefix_ = value["download_prefix"].asString();
-            packfilePrefix_ = value["packfile_suffix"].asString();
-            packDir_ = value["pack_dir"].asString();
-            backDir_ = value["back_dir"].asString();
-            backupFile_ = value["backup_file"].asString();
+            hotTime_ = value.value("hot_time", 0);
+            serverPort_ = value.value("server_port", 0);
+            serverip_ = value.value("server_ip", "");
+            downloadPrefix_ = value.value("download_prefix", "");
+            packfilePrefix_ = value.value("packfile_suffix", "");
+            packDir_ = value.value("pack_dir", "");
+            backDir_ = value.value("back_dir", "");
+            backupFile_ = value.value("backup_file", "");
             logger->debug("load config file[{}] success", DEFAULT_CONFIG);
 
             // 4. 创建备份与压缩目录

@@ -155,7 +155,7 @@ namespace zbackup
             logger->debug("FileStorage init load get file[{}] content success", backupFile_);
 
             // 3.反序列化
-            Json::Value root;
+            nlohmann::json root;
             if (JsonUtil::Deserialize(&root, body) == false)
             {
                 logger->warn("FileStorage init load Deserialize failed");
@@ -164,16 +164,16 @@ namespace zbackup
             logger->debug("FileStorage init load Deserialize success");
 
             // 4.将反序列化好的数据添加进tables_
-            for (int i = 0; i < root.size(); i++)
+            for (auto &item : root)
             {
                 BackupInfo info;
-                info.fsize_ = root[i]["fsize_"].asUInt64();
-                info.atime_ = root[i]["atime_"].asUInt64();
-                info.mtime_ = root[i]["mtime_"].asUInt64();
-                info.packFlag_ = root[i]["packFlag_"].asBool();
-                info.realPath_ = root[i]["realPath_"].asString();
-                info.packPath_ = root[i]["packPath_"].asString();
-                info.url_ = root[i]["url_"].asString();
+                info.fsize_ = item.value("fsize_", 0);
+                info.atime_ = item.value("atime_", 0);
+                info.mtime_ = item.value("mtime_", 0);
+                info.packFlag_ = item.value("packFlag_", false);
+                info.realPath_ = item.value("realPath_", "");
+                info.packPath_ = item.value("packPath_", "");
+                info.url_ = item.value("url_", "");
                 insert(info);
             }
 
@@ -188,19 +188,19 @@ namespace zbackup
             getAll(&array);
             logger->debug("FileStorage persistence get all info success");
 
-            // 2. 添加到Json::Value
-            Json::Value root;
-            for (int i = 0; i < array.size(); i++)
+            // 2. 添加到nlohmann::json
+            nlohmann::json root = nlohmann::json::array();
+            for (const auto &info : array)
             {
-                Json::Value item;
-                item["packFlag_"] = array[i].packFlag_;
-                item["fsize_"] = static_cast<Json::UInt64>(array[i].fsize_);
-                item["atime_"] = static_cast<Json::UInt64>(array[i].atime_);
-                item["mtime_"] = static_cast<Json::UInt64>(array[i].mtime_);
-                item["realPath_"] = array[i].realPath_;
-                item["packPath_"] = array[i].packPath_;
-                item["url_"] = array[i].url_;
-                root.append(item);
+                nlohmann::json item;
+                item["packFlag_"] = info.packFlag_;
+                item["fsize_"] = info.fsize_;
+                item["atime_"] = info.atime_;
+                item["mtime_"] = info.mtime_;
+                item["realPath_"] = info.realPath_;
+                item["packPath_"] = info.packPath_;
+                item["url_"] = info.url_;
+                root.push_back(item);
             }
             logger->debug("FileStorage persistence add all info success into json");
 

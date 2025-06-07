@@ -5,7 +5,7 @@
 #include <fstream>
 #include <filesystem>
 #include <sys/stat.h>
-#include <jsoncpp/json/json.h>
+#include <nlohmann/json.hpp> // 替换jsoncpp
 #include "logger.hpp"
 
 /*
@@ -237,47 +237,36 @@ namespace zbackup
     class JsonUtil
     {
     public:
-        static bool Serialize(const Json::Value &root, std::string *str)
+        // 序列化
+        static bool Serialize(const nlohmann::json &root, std::string *str)
         {
-            // 1. 创建一个建造类
-            Json::StreamWriterBuilder swb;
-
-            // 2. 建造一个StreamWriter类
-            std::unique_ptr<Json::StreamWriter> sw(swb.newStreamWriter());
-
-            // 3.写入
-            std::stringstream ss;
-            if (sw->write(root, &ss) != 0)
+            try
             {
-                logger->warn("Serialize write error, error message");
+                *str = root.dump();
+                logger->info("serialize has done");
+                return true;
+            }
+            catch (const std::exception &e)
+            {
+                logger->warn("Serialize write error: {}", e.what());
                 return false;
             }
-
-            *str = ss.str();
-            logger->info("serialize has done");
-            return true;
         }
 
-        static bool Deserialize(Json::Value *root, const std::string &str)
+        // 反序列化
+        static bool Deserialize(nlohmann::json *root, const std::string &str)
         {
-            // 1. 创建一个建造类
-            Json::CharReaderBuilder crb;
-
-            // 2. 创建一个CharReader类
-            std::unique_ptr<Json::CharReader> cr(crb.newCharReader());
-
-            // 3.读取
-            std::string err;
-            size_t len = str.size();
-            bool ret = cr->parse(str.c_str(), str.c_str() + len, root, &err);
-            if (ret == false)
+            try
             {
-                logger->warn("Deserialize parse error");
-                logger->warn("error message is {}",err);
+                *root = nlohmann::json::parse(str);
+                logger->info("deserialize has done");
+                return true;
+            }
+            catch (const std::exception &e)
+            {
+                logger->warn("Deserialize parse error: {}", e.what());
                 return false;
             }
-            logger->info("deserialize has done");
-            return true;
         }
     };
 }; // namespace zbackup

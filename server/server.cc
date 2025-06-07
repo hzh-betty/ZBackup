@@ -1,7 +1,10 @@
 #include"server.hpp"
+#include <muduo/base/Logging.h>
+
 int main()
 {
-    zbackup::Log::Init(zlog::LogLevel::value::WARNING);
+    muduo::Logger::setLogLevel(muduo::Logger::ERROR);
+    zbackup::Log::Init(zlog::LogLevel::value::INFO);
     zbackup::Compress::ptr compress(new zbackup::SnappyCompress());
     zbackup::Storage::ptr storage(new zbackup::FileStorage());
     zbackup::BackupServer::ptr server(new zbackup::BackupServer(compress,storage));
