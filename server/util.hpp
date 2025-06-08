@@ -37,11 +37,67 @@ namespace zbackup
             // 2. 删除指定文件
             if (remove(pathname_.c_str()) == -1)
             {
-                logger->error("remove file[{}] falied, erro info is {}", pathname_, strerror(errno));
+                logger->error("remove file[{}] failed, error info is {}", pathname_, strerror(errno));
                 return false;
             }
             logger->info("remove file[{}] success", pathname_);
             return true;
+        }
+
+        // 删除目录及其内容
+        bool removeDirectory()
+        {
+            if (!exists())
+            {
+                logger->debug("remove directory[{}] not exists", pathname_);
+                return true;
+            }
+
+            try
+            {
+                bool result = fs::remove_all(pathname_);
+                if (result)
+                {
+                    logger->info("remove directory[{}] success", pathname_);
+                }
+                else
+                {
+                    logger->error("remove directory[{}] failed", pathname_);
+                }
+                return result;
+            }
+            catch (const std::exception &e)
+            {
+                logger->error("remove directory[{}] failed with exception: {}", pathname_, e.what());
+                return false;
+            }
+        }
+
+        // 强制删除文件或目录
+        bool forceRemove()
+        {
+            if (!exists())
+            {
+                logger->debug("force remove[{}] not exists", pathname_);
+                return true;
+            }
+
+            try
+            {
+                if (fs::is_directory(pathname_))
+                {
+                    return removeDirectory();
+                }
+                else
+                {
+                    return removeFile();
+                }
+            }
+            catch (const std::exception &e)
+            {
+                logger->error("force remove[{}] failed with exception: {}", pathname_, e.what());
+                return false;
+            }
         }
 
         // 获取文件大小

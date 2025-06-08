@@ -36,8 +36,8 @@ namespace zbackup
                 logger->debug("download unCompress success");
 
                 // 3. 删除压缩包，修改备份信息（已经没有被压缩）
-                FileUtil fu(info.packPath_);
-                if (fu.removeFile() == false)
+                FileUtil fu_pack(info.packPath_);
+                if (fu_pack.removeFile() == false)
                 {
                     logger->warn("download remove file[{}] failed", info.packPath_);
                     rsp->set_status_code(zhttp::HttpResponse::StatusCode::InternalServerError);

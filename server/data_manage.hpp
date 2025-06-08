@@ -66,6 +66,54 @@ namespace zbackup
             return storage_->persistence();
         }
 
+        // 删除备份信息
+        bool deleteOne(const BackupInfo &info)
+        {
+            std::unique_lock<std::shared_mutex> lock(rw_mutex_);
+            bool result = storage_->deleteOne(info);
+            if (result)
+            {
+                logger->info("DataManager delete backup info success for url[{}]", info.url_);
+            }
+            else
+            {
+                logger->warn("DataManager delete backup info failed for url[{}]", info.url_);
+            }
+            return result;
+        }
+
+        // 根据URL删除备份信息
+        bool deleteByURL(const std::string &url)
+        {
+            std::unique_lock<std::shared_mutex> lock(rw_mutex_);
+            bool result = storage_->deleteByURL(url);
+            if (result)
+            {
+                logger->info("DataManager delete backup info by URL[{}] success", url);
+            }
+            else
+            {
+                logger->warn("DataManager delete backup info by URL[{}] failed", url);
+            }
+            return result;
+        }
+
+        // 根据真实路径删除备份信息
+        bool deleteByRealPath(const std::string &realPath)
+        {
+            std::unique_lock<std::shared_mutex> lock(rw_mutex_);
+            bool result = storage_->deleteByRealPath(realPath);
+            if (result)
+            {
+                logger->info("DataManager delete backup info by realPath[{}] success", realPath);
+            }
+            else
+            {
+                logger->warn("DataManager delete backup info by realPath[{}] failed", realPath);
+            }
+            return result;
+        }
+
     private:
         // 私有构造函数
         explicit DataManager(Storage::ptr storage)

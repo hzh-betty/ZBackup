@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ZBackup - 文件备份系统</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            font-weight: 300;
+        }
+
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .upload-section {
+            padding: 30px;
+            background: #f8f9fa;
+            border-bottom: 1px solid #eee;
+        }
+
+        .upload-area {
+            border: 3px dashed #4facfe;
+            border-radius: 10px;
+            padding: 40px;
+            text-align: center;
+            background: white;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .upload-area:hover {
+            border-color: #00f2fe;
+            background: #f0f8ff;
+        }
+
+        .upload-area.dragover {
+            border-color: #00f2fe;
+            background: #e6f7ff;
+            transform: scale(1.02);
+        }
+
+        .upload-icon {
+            font-size: 3em;
+            color: #4facfe;
+            margin-bottom: 15px;
+        }
+
+        .file-input {
+            display: none;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 1em;
+            transition: all 0.3s ease;
+            margin: 5px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(79, 172, 254, 0.4);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #ff416c 0%, #ff4b2b 100%);
+        }
+
+        .btn-danger:hover {
+            box-shadow: 0 5px 15px rgba(255, 65, 108, 0.4);
+        }
+
+        .files-section {
+            padding: 30px;
+        }
+
+        .files-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .files-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+        }
+
+        .files-table thead {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .files-table th,
+        .files-table td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+
+        .files-table tbody tr:hover {
+            background: #f8f9fa;
+        }
+
+        .file-name {
+            color: #4facfe;
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .file-name:hover {
+            text-decoration: underline;
+        }
+
+        .file-size {
+            color: #666;
+            font-size: 0.9em;
+        }
+
+        .file-date {
+            color: #888;
+            font-size: 0.9em;
+        }
+
+        .actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 6px;
+            background: #eee;
+            border-radius: 3px;
+            overflow: hidden;
+            margin-top: 10px;
+            display: none;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        .message {
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 8px;
+            display: none;
+        }
+
+        .message.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .message.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #666;
+        }
+
+        .empty-icon {
+            font-size: 4em;
+            color: #ddd;
+            margin-bottom: 20px;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                margin: 10px;
+                border-radius: 10px;
+            }
+            
+            .header h1 {
+                font-size: 2em;
+            }
+            
+            .files-table {
+                font-size: 0.9em;
+            }
+            
+            .actions {
+                flex-direction: column;
+                gap: 5px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🚀 ZBackup</h1>
+            <p>简单、快速、安全的文件备份系统</p>
+        </div>
+
+        <div class="upload-section">
+            <div class="upload-area" id="uploadArea">
+                <div class="upload-icon">📁</div>
+                <h3>点击选择文件或拖拽文件到此处</h3>
+                <p>支持所有文件类型</p>
+                <input type="file" id="fileInput" class="file-input" multiple>
+                <button class="btn" onclick="document.getElementById('fileInput').click()">选择文件</button>
+            </div>
+            <div class="progress-bar" id="progressBar">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+            <div class="message" id="message"></div>
+        </div>
+
+        <div class="files-section">
+            <div class="files-header">
+                <h2>📋 备份文件列表</h2>
+                <button class="btn" onclick="loadFiles()">🔄 刷新列表</button>
+            </div>
+            <div id="filesList"></div>
+        </div>
+    </div>
+
+    <script>
+        // 页面加载时获取文件列表
+        document.addEventListener('DOMContentLoaded', loadFiles);
+
+        // 文件上传相关
+        const uploadArea = document.getElementById('uploadArea');
+        const fileInput = document.getElementById('fileInput');
+        const progressBar = document.getElementById('progressBar');
+        const progressFill = document.getElementById('progressFill');
+        const message = document.getElementById('message');
+
+        // 拖拽上传
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.classList.add('dragover');
+        });
+
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.classList.remove('dragover');
+        });
+
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+            const files = e.dataTransfer.files;
+            handleFiles(files);
+        });
+
+        fileInput.addEventListener('change', (e) => {
+            handleFiles(e.target.files);
+        });
+
+        function handleFiles(files) {
+            for (let file of files) {
+                uploadFile(file);
+            }
+        }
+
+        function uploadFile(file) {
+            const formData = new FormData();
+            formData.append('file', file);
+
+            progressBar.style.display = 'block';
+            progressFill.style.width = '0%';
+
+            fetch('/upload', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => {
+                if (response.ok) {
+                    showMessage('文件上传成功！', 'success');
+                    loadFiles();
+                } else {
+                    throw new Error('上传失败');
+                }
+            })
+            .catch(error => {
+                showMessage('上传失败：' + error.message, 'error');
+            })
+            .finally(() => {
+                progressBar.style.display = 'none';
+                fileInput.value = '';
+            });
+
+            // 模拟进度
+            let progress = 0;
+            const interval = setInterval(() => {
+                progress += Math.random() * 30;
+                if (progress > 100) {
+                    progress = 100;
+                    clearInterval(interval);
+                }
+                progressFill.style.width = progress + '%';
+            }, 200);
+        }
+
+        function loadFiles() {
+            fetch('/listshow')
+                .then(response => response.text())
+                .then(html => {
+                    // 解析返回的HTML，提取文件信息
+                    const parser = new DOMParser();
+                    const doc = parser.parseFromString(html, 'text/html');
+                    const rows = doc.querySelectorAll('tr');
+                    
+                    const files = [];
+                    rows.forEach(row => {
+                        const cells = row.querySelectorAll('td');
+                        if (cells.length >= 3) {
+                            const link = cells[0].querySelector('a');
+                            if (link) {
+                                files.push({
+                                    name: link.textContent,
+                                    url: link.getAttribute('href'),
+                                    date: cells[1].textContent.trim(),
+                                    size: cells[2].textContent.trim()
+                                });
+                            }
+                        }
+                    });
+                    
+                    displayFiles(files);
+                })
+                .catch(error => {
+                    showMessage('获取文件列表失败：' + error.message, 'error');
+                });
+        }
+
+        function displayFiles(files) {
+            const filesList = document.getElementById('filesList');
+            
+            if (files.length === 0) {
+                filesList.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-icon">📂</div>
+                        <h3>还没有备份文件</h3>
+                        <p>上传一些文件开始使用吧！</p>
+                    </div>
+                `;
+                return;
+            }
+
+            const tableHTML = `
+                <table class="files-table">
+                    <thead>
+                        <tr>
+                            <th>📄 文件名</th>
+                            <th>📅 修改时间</th>
+                            <th>📊 大小</th>
+                            <th>⚡ 操作</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${files.map(file => `
+                            <tr>
+                                <td>
+                                    <a href="${file.url}" class="file-name" download>
+                                        ${file.name}
+                                    </a>
+                                </td>
+                                <td class="file-date">${file.date}</td>
+                                <td class="file-size">${file.size}</td>
+                                <td>
+                                    <div class="actions">
+                                        <a href="${file.url}" class="btn" download>⬇️ 下载</a>
+                                        <button class="btn btn-danger" onclick="deleteFile('${file.url}')">🗑️ 删除</button>
+                                    </div>
+                                </td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            `;
+            
+            filesList.innerHTML = tableHTML;
+        }
+
+        function deleteFile(url) {
+            if (!confirm('确定要删除这个文件吗？此操作不可恢复！')) {
+                return;
+            }
+
+            fetch(`/delete?url=${encodeURIComponent(url)}`, {
+                method: 'DELETE'
+            })
+            .then(response => {
+                if (response.ok) {
+                    showMessage('文件删除成功！', 'success');
+                    loadFiles();
+                } else {
+                    throw new Error('删除失败');
+                }
+            })
+            .catch(error => {
+                showMessage('删除失败：' + error.message, 'error');
+            });
+        }
+
+        function showMessage(text, type) {
+            message.textContent = text;
+            message.className = `message ${type}`;
+            message.style.display = 'block';
+            
+            setTimeout(() => {
+                message.style.display = 'none';
+            }, 5000);
+        }
+    </script>
+</body>
+</html>

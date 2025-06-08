@@ -58,6 +58,12 @@ namespace zbackup
         virtual bool getOneByRealPath(const std::string &realPath, BackupInfo *info) = 0;
         // 查找所有备份信息
         virtual void getAll(std::vector<BackupInfo> *arry) = 0;
+        // 删除备份信息
+        virtual bool deleteOne(const BackupInfo &info) = 0;
+        // 根据URL删除备份信息
+        virtual bool deleteByURL(const std::string &url) = 0;
+        // 根据真实路径删除备份信息
+        virtual bool deleteByRealPath(const std::string &realPath) = 0;
         // 初始化加载
         virtual bool initLoad() = 0;
         // 持久化
@@ -127,6 +133,51 @@ namespace zbackup
                 arry->push_back(iter->second);
             }
             logger->info("FileStorage get all info success");
+        }
+
+        // 删除备份信息
+        bool deleteOne(const BackupInfo &info) override
+        {
+            auto iter = tables_.find(info.url_);
+            if (iter == tables_.end())
+            {
+                logger->warn("FileStorage delete info by url[{}] not found", info.url_);
+                return false;
+            }
+            tables_.erase(iter);
+            logger->info("FileStorage delete info by url[{}] success", info.url_);
+            return true;
+        }
+
+        // 根据URL删除备份信息
+        bool deleteByURL(const std::string &url) override
+        {
+            auto iter = tables_.find(url);
+            if (iter == tables_.end())
+            {
+                logger->warn("FileStorage delete info by url[{}] not found", url);
+                return false;
+            }
+            tables_.erase(iter);
+            logger->info("FileStorage delete info by url[{}] success", url);
+            return true;
+        }
+
+        // 根据真实路径删除备份信息
+        bool deleteByRealPath(const std::string &realPath) override
+        {
+            auto iter = tables_.begin();
+            for (; iter != tables_.end(); ++iter)
+            {
+                if (iter->second.realPath_ == realPath)
+                {
+                    logger->info("FileStorage delete info by realPath[{}] success", realPath);
+                    tables_.erase(iter);
+                    return true;
+                }
+            }
+            logger->warn("FileStorage delete info by realPath[{}] not found", realPath);
+            return false;
         }
 
     private:

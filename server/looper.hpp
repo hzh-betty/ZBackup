@@ -63,11 +63,23 @@ namespace zbackup
             }
 
             // 4. 对热点文件进行压缩
-            comp_->compress(str, bi.packPath_);
-            FileUtil tmp(str);
+            if (!comp_->compress(str, bi.packPath_))
+            {
+                logger->error("hotMonitor compress file[{}] failed", str);
+                return;
+            }
 
+            FileUtil tmp(str);
             // 5. 删除源文件
-            tmp.removeFile();
+            if (!tmp.removeFile())
+            {
+                logger->error("hotMonitor remove source file[{}] failed", str);
+                // 如果删除源文件失败，也删除压缩文件
+                FileUtil pack_tmp(bi.packPath_);
+                pack_tmp.removeFile();
+                return;
+            }
+
             bi.packFlag_ = true;
             if (dataManager->update(bi) == false)
             {
