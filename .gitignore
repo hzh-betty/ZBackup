@@ -51,8 +51,6 @@ vgcore.*
 # 项目特定目录和文件
 backdir/
 packdir/
-config/config.json
-config/data.json
 
 # 备份服务器可执行文件
 backup_server
