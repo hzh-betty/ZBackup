@@ -6,5 +6,8 @@
     "packfile_suffix": ".snp",
     "pack_dir": "../packdir/",
     "back_dir": "../backdir/",
-    "backup_file": "../config/data.json"
+    "backup_file": "../config/data.json",
+    "use_ssl": true,
+    "cert_file_path": "/home/betty/ssl/server.crt",
+    "key_file_path": "/home/betty/ssl/server.key"
 }
