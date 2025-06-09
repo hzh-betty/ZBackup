@@ -32,6 +32,7 @@
             color: white;
             padding: 30px;
             text-align: center;
+            position: relative;
         }
 
         .header h1 {
@@ -43,6 +44,56 @@
         .header p {
             font-size: 1.1em;
             opacity: 0.9;
+        }
+
+        .user-info {
+            position: absolute;
+            top: 20px;
+            right: 30px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .user-info span {
+            font-size: 0.9em;
+            opacity: 0.9;
+        }
+
+        .btn-logout {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            padding: 8px 16px;
+            border-radius: 15px;
+            cursor: pointer;
+            font-size: 0.9em;
+            transition: all 0.3s ease;
+        }
+
+        .btn-logout:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .login-prompt {
+            background: #fff3cd;
+            color: #856404;
+            padding: 20px;
+            margin: 20px;
+            border-radius: 10px;
+            text-align: center;
+            border: 1px solid #ffeaa7;
+        }
+
+        .login-prompt a {
+            color: #4facfe;
+            text-decoration: none;
+            font-weight: 500;
+            margin: 0 10px;
+        }
+
+        .login-prompt a:hover {
+            text-decoration: underline;
         }
 
         .upload-section {
@@ -240,11 +291,21 @@
 <body>
     <div class="container">
         <div class="header">
+            <div class="user-info" id="userInfo" style="display: none;">
+                <span id="username"></span>
+                <button class="btn-logout" onclick="logout()">登出</button>
+            </div>
             <h1>🚀 ZBackup</h1>
             <p>简单、快速、安全的文件备份系统</p>
         </div>
 
-        <div class="upload-section">
+        <div class="login-prompt" id="loginPrompt" style="display: none;">
+            <p>请先登录以使用文件备份功能</p>
+            <a href="/login.html">登录</a>
+            <a href="/register.html">注册</a>
+        </div>
+
+        <div class="upload-section" id="uploadSection">
             <div class="upload-area" id="uploadArea">
                 <div class="upload-icon">📁</div>
                 <h3>点击选择文件或拖拽文件到此处</h3>
@@ -258,7 +319,7 @@
             <div class="message" id="message"></div>
         </div>
 
-        <div class="files-section">
+        <div class="files-section" id="filesSection">
             <div class="files-header">
                 <h2>📋 备份文件列表</h2>
                 <button class="btn" onclick="loadFiles()">🔄 刷新列表</button>
@@ -268,8 +329,13 @@
     </div>
 
     <script>
-        // 页面加载时获取文件列表
-        document.addEventListener('DOMContentLoaded', loadFiles);
+        let isLoggedIn = false;
+        let currentUser = '';
+
+        // 页面加载时检查登录状态
+        document.addEventListener('DOMContentLoaded', () => {
+            checkLoginStatus();
+        });
 
         // 文件上传相关
         const uploadArea = document.getElementById('uploadArea');
@@ -305,7 +371,70 @@
             }
         }
 
+        async function checkLoginStatus() {
+            try {
+                const response = await fetch('/listshow');
+                if (response.status === 401) {
+                    // 未登录
+                    showLoginPrompt();
+                } else if (response.ok) {
+                    // 已登录，尝试获取用户信息
+                    isLoggedIn = true;
+                    hideLoginPrompt();
+                    loadFiles();
+                    // 这里可以添加获取用户信息的逻辑
+                    showUserInfo('用户'); // 临时显示，实际应该从session获取用户名
+                }
+            } catch (error) {
+                console.error('检查登录状态失败:', error);
+                showLoginPrompt();
+            }
+        }
+
+        function showLoginPrompt() {
+            document.getElementById('loginPrompt').style.display = 'block';
+            document.getElementById('uploadSection').style.display = 'none';
+            document.getElementById('filesSection').style.display = 'none';
+            document.getElementById('userInfo').style.display = 'none';
+        }
+
+        function hideLoginPrompt() {
+            document.getElementById('loginPrompt').style.display = 'none';
+            document.getElementById('uploadSection').style.display = 'block';
+            document.getElementById('filesSection').style.display = 'block';
+        }
+
+        function showUserInfo(username) {
+            currentUser = username;
+            document.getElementById('username').textContent = `欢迎, ${username}`;
+            document.getElementById('userInfo').style.display = 'flex';
+        }
+
+        async function logout() {
+            try {
+                const response = await fetch('/logout', {
+                    method: 'POST'
+                });
+                
+                if (response.ok) {
+                    isLoggedIn = false;
+                    currentUser = '';
+                    showMessage('已成功登出', 'success');
+                    showLoginPrompt();
+                } else {
+                    throw new Error('登出失败');
+                }
+            } catch (error) {
+                showMessage('登出失败：' + error.message, 'error');
+            }
+        }
+
         function uploadFile(file) {
+            if (!isLoggedIn) {
+                showMessage('请先登录', 'error');
+                return;
+            }
+
             const formData = new FormData();
             formData.append('file', file);
 
@@ -345,6 +474,10 @@
         }
 
         function loadFiles() {
+            if (!isLoggedIn) {
+                return;
+            }
+
             fetch('/listshow')
                 .then(response => response.text())
                 .then(html => {
@@ -426,6 +559,11 @@
         }
 
         function deleteFile(url) {
+            if (!isLoggedIn) {
+                showMessage('请先登录', 'error');
+                return;
+            }
+
             if (!confirm('确定要删除这个文件吗？此操作不可恢复！')) {
                 return;
             }

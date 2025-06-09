@@ -9,5 +9,10 @@
     "backup_file": "../config/data.json",
     "use_ssl": true,
     "cert_file_path": "/home/betty/ssl/server.crt",
-    "key_file_path": "/home/betty/ssl/server.key"
+    "key_file_path": "/home/betty/ssl/server.key",
+    "db_host": "127.0.0.1",
+    "db_port": 3306,
+    "db_user": "betty",
+    "db_password": "betty",
+    "db_name": "zbackup"
 }

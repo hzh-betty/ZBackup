@@ -22,6 +22,14 @@ namespace zbackup
         bool get_use_ssl() const ;
         std::string get_cert_file_path() const;
         std::string get_key_file_path() const;
+        
+        // 新增数据库配置获取方法
+        std::string get_db_host() const;
+        uint16_t get_db_port() const;
+        std::string get_db_user() const;
+        std::string get_db_password() const;
+        std::string get_db_name() const;
+        
     private:
         Config();
         bool read_config_file();
@@ -38,5 +46,12 @@ namespace zbackup
         bool use_ssl_ = false;
         std::string cert_file_path_;
         std::string key_file_path_;
+        
+        // 新增数据库配置成员变量
+        std::string db_host_;
+        uint16_t db_port_;
+        std::string db_user_;
+        std::string db_password_;
+        std::string db_name_;
     };
 }

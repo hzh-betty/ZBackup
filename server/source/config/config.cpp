@@ -49,6 +49,13 @@ namespace zbackup
         use_ssl_ = value.value("use_ssl", false);
         cert_file_path_ = value.value("cert_file_path", "");
         key_file_path_ = value.value("key_file_path", "");
+        
+        // 读取数据库配置
+        db_host_ = value.value("db_host", "localhost");
+        db_port_ = value.value("db_port", 3306);
+        db_user_ = value.value("db_user", "root");
+        db_password_ = value.value("db_password", "");
+        db_name_ = value.value("db_name", "zbackup");
 
         FileUtil tmp1(back_dir_);
         FileUtil tmp2(pack_dir_);
@@ -65,6 +72,7 @@ namespace zbackup
 
         ZBACKUP_LOG_INFO("Configuration loaded successfully from {}", DEFAULT_CONFIG);
         ZBACKUP_LOG_INFO("Server: {}:{}, Backup dir: {}, Pack dir: {}", server_ip_, server_port_, back_dir_, pack_dir_);
+        ZBACKUP_LOG_INFO("Database: {}:{}@{}/{}", db_user_, db_port_, db_host_, db_name_);
         return true;
     }
 
@@ -122,5 +130,31 @@ namespace zbackup
     std::string zbackup::Config::get_key_file_path() const
     {
         return key_file_path_;
+    }
+    
+    // 新增数据库配置获取方法实现
+    std::string Config::get_db_host() const
+    {
+        return db_host_;
+    }
+
+    uint16_t Config::get_db_port() const
+    {
+        return db_port_;
+    }
+
+    std::string Config::get_db_user() const
+    {
+        return db_user_;
+    }
+
+    std::string Config::get_db_password() const
+    {
+        return db_password_;
+    }
+
+    std::string Config::get_db_name() const
+    {
+        return db_name_;
     }
 } // namespace zbackup
