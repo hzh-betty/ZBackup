@@ -13,10 +13,10 @@ namespace zbackup
         AuthMiddleware();
         
         // 请求前处理
-        void before(HttpRequest &request) override;
+        void before(zhttp::HttpRequest &request) override;
 
         // 响应后处理
-        void after(HttpResponse &response) override;
+        void after(zhttp::HttpResponse &response) override;
 
     private:
         bool is_authenticated(const zhttp::HttpRequest &req);

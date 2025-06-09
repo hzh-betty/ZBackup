@@ -27,8 +27,8 @@ namespace zbackup
         builder->build_port(server_port_);
         builder->build_name("BackupServer");
         builder->build_thread_num(4);
-        builder->build_middleware();
-        server_ = builder->build(MiddleWareFactory::create<zbackup::AuthMiddleware>());
+        // builder->build_middleware(MiddleWareFactory::create<zbackup::AuthMiddleware>());
+        server_ = builder->build();
 
         // 创建各种请求处理器
         upload_handler_ = std::make_shared<UploadHandler>(comp);
@@ -41,7 +41,6 @@ namespace zbackup
         login_handler_ = std::make_shared<LoginHandler>(comp, user_manager_);
         register_handler_ = std::make_shared<RegisterHandler>(comp, user_manager_);
         logout_handler_ = std::make_shared<LogoutHandler>(comp);
-        auth_middleware_ = std::make_shared<AuthMiddleware>();
         
         ZBACKUP_LOG_INFO("BackupServer initialized on {}:{}", server_ip_, server_port_);
     }
@@ -55,9 +54,9 @@ namespace zbackup
         server_->Post("/logout", logout_handler_);
         
         // 注册需要认证的API路由，并添加认证中间件
-        server_->Post("/upload", upload_handler_, {auth_middleware_});
-        server_->Get("/listshow", list_show_handler_, {auth_middleware_});
-        server_->Delete("/delete", delete_handler_, {auth_middleware_});
+        server_->Post("/upload", upload_handler_);
+        server_->Get("/listshow", list_show_handler_);
+        server_->Delete("/delete", delete_handler_);
         
         // 注册下载路由
         std::string download_url = download_prefix_ + "(.*)";
@@ -72,5 +71,6 @@ namespace zbackup
 
         ZBACKUP_LOG_INFO("BackupServer starting on port {}", server_port_);
         server_->start();
+        looper_->start(); // 启动后台热点监视
     }
 }

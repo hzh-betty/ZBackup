@@ -7,12 +7,15 @@ namespace zbackup
     BackupLooper::BackupLooper(Compress::ptr comp)
         : stop_(false), comp_(comp)
     {
-        // 在线程池中启动热点监控任务
-        ThreadPool::get_instance()->submit_task([this]()
-                                              { hot_monitor(); });
-        ZBACKUP_LOG_INFO("BackupLooper started");
+        ZBACKUP_LOG_INFO("BackupLooper initialized");
     }
 
+    void BackupLooper::start()
+    {
+        std::thread monitor_thread(&BackupLooper::hot_monitor, this);
+        monitor_thread.detach(); // 分离线程，允许其在后台运行
+        ZBACKUP_LOG_INFO("BackupLooper started monitoring for hot files");
+    }
     // 析构函数，停止监控循环
     BackupLooper::~BackupLooper()
     {

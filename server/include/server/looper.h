@@ -14,12 +14,12 @@ namespace zbackup
         
         BackupLooper(Compress::ptr comp);
         ~BackupLooper();
+        void start();
 
     private:
         void hot_monitor();
         void deal_task(const std::string &str);
         bool hot_judge(const std::string &filename, int hot_time);
-
     private:
         std::atomic<bool> stop_;
         Compress::ptr comp_;
