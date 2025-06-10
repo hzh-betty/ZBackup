@@ -57,6 +57,7 @@ namespace zbackup
             resp_json["success"] = true;
             resp_json["message"] = "Login successful";
             resp_json["username"] = username;
+            resp_json["redirect"] = "/index.html";
 
             std::string response_body;
             JsonUtil::serialize(resp_json, &response_body);

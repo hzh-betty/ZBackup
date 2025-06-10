@@ -22,7 +22,7 @@ namespace zbackup
         std::string path = req.get_path();
         ZBACKUP_LOG_DEBUG("Static file request: {}", path);
         
-        // 如果是根路径，重定向到index.html
+        // 特殊处理根路径和index页面
         if (path == "/" || path == "/index" || path == "/index.html") {
             path = "/index.html";
         }

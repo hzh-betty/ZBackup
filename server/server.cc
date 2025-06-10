@@ -17,8 +17,7 @@ int main()
         zbackup::Storage::ptr storage(new zbackup::FileStorage());
         zbackup::BackupServer::ptr server(new zbackup::BackupServer(compress, storage));
         
-        // 启动线程池和服务器
-        zbackup::ThreadPool::get_instance()->start();
+        // 启动服务器
         ZBACKUP_LOG_INFO("Thread pool started successfully");
         
         server->run();

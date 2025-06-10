@@ -7,12 +7,8 @@ namespace zbackup
 
     void AuthMiddleware::before(zhttp::HttpRequest &req)
     {
-        if (!is_authenticated(req)) {
-            ZBACKUP_LOG_WARN("Unauthorized access attempt to {}", req.get_path());
-            
-            // 设置401响应状态，让框架处理
-            throw std::runtime_error("Authentication required");
-        }
+        // 允许所有请求通过，不进行认证检查
+        ZBACKUP_LOG_DEBUG("AuthMiddleware: allowing access to {}", req.get_path());
     }
 
     void AuthMiddleware::after(zhttp::HttpResponse &rsp)

@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ZBackup - 文件备份系统</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            padding: 60px 20px;
+            animation: fadeInUp 1s ease-out;
+        }
+
+        .header h1 {
+            font-size: 4em;
+            margin-bottom: 20px;
+            text-shadow: 0 4px 8px rgba(0,0,0,0.3);
+        }
+
+        .header p {
+            font-size: 1.5em;
+            opacity: 0.9;
+            margin-bottom: 40px;
+        }
+
+        .nav-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            padding: 15px 30px;
+            border-radius: 50px;
+            text-decoration: none;
+            font-size: 1.1em;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            border-color: rgba(255, 255, 255, 0.5);
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            border: none;
+        }
+
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #3d8bfe 0%, #00d4fe 100%);
+            transform: translateY(-3px) scale(1.05);
+        }
+
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin-top: 60px;
+            animation: fadeInUp 1s ease-out 0.3s both;
+        }
+
+        .feature-card {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 30px;
+            color: white;
+            text-align: center;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: transform 0.3s ease;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-10px);
+        }
+
+        .feature-icon {
+            font-size: 3em;
+            margin-bottom: 20px;
+            display: block;
+        }
+
+        .feature-card h3 {
+            font-size: 1.5em;
+            margin-bottom: 15px;
+        }
+
+        .feature-card p {
+            opacity: 0.9;
+            line-height: 1.6;
+        }
+
+        .footer {
+            text-align: center;
+            color: white;
+            margin-top: 80px;
+            padding: 40px 20px;
+            opacity: 0.8;
+            animation: fadeInUp 1s ease-out 0.6s both;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2.5em;
+            }
+            
+            .header p {
+                font-size: 1.2em;
+            }
+            
+            .nav-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .btn {
+                width: 80%;
+                max-width: 300px;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🚀 ZBackup</h1>
+            <p>简单、快速、安全的文件备份系统</p>
+            
+            <div class="nav-buttons">
+                <a href="/login.html" class="btn btn-primary">立即登录</a>
+                <a href="/register.html" class="btn">注册账号</a>
+            </div>
+        </div>
+
+        <div class="features">
+            <div class="feature-card">
+                <span class="feature-icon">🔐</span>
+                <h3>安全可靠</h3>
+                <p>采用先进的加密技术保护您的文件安全，支持用户认证和会话管理，确保数据隐私。</p>
+            </div>
+            
+            <div class="feature-card">
+                <span class="feature-icon">⚡</span>
+                <h3>高效压缩</h3>
+                <p>使用Snappy压缩算法，在保证压缩速度的同时有效减少存储空间占用。</p>
+            </div>
+            
+            <div class="feature-card">
+                <span class="feature-icon">📱</span>
+                <h3>简单易用</h3>
+                <p>现代化的Web界面，支持拖拽上传，文件管理直观便捷，支持移动端访问。</p>
+            </div>
+            
+            <div class="feature-card">
+                <span class="feature-icon">🔄</span>
+                <h3>智能管理</h3>
+                <p>自动监控文件热度，智能压缩冷文件，优化存储效率和访问性能。</p>
+            </div>
+            
+            <div class="feature-card">
+                <span class="feature-icon">⬇️</span>
+                <h3>断点续传</h3>
+                <p>支持大文件断点续传下载，网络中断后可继续传输，提升用户体验。</p>
+            </div>
+            
+            <div class="feature-card">
+                <span class="feature-icon">🌐</span>
+                <h3>多平台支持</h3>
+                <p>基于Web技术，支持Windows、Linux、macOS等多种操作系统，随时随地访问。</p>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p>&copy; 2024 ZBackup. 专业的文件备份解决方案.</p>
+            <p>基于现代C++开发，采用muduo网络库和Redis存储</p>
+        </div>
+    </div>
+
+    <script>
+        // 添加页面加载动画效果
+        document.addEventListener('DOMContentLoaded', function() {
+            // 检查是否已登录，如果已登录则显示进入系统按钮
+            checkLoginStatus();
+        });
+
+        async function checkLoginStatus() {
+            try {
+                const response = await fetch('/api/status', {
+                    method: 'GET',
+                    credentials: 'same-origin'
+                });
+                
+                if (response.ok) {
+                    const result = await response.json();
+                    if (result.logged_in) {
+                        // 用户已登录，添加进入系统按钮
+                        const navButtons = document.querySelector('.nav-buttons');
+                        const enterSystemBtn = document.createElement('a');
+                        enterSystemBtn.href = '/index.html';
+                        enterSystemBtn.className = 'btn btn-primary';
+                        enterSystemBtn.textContent = '进入系统';
+                        
+                        navButtons.insertBefore(enterSystemBtn, navButtons.firstChild);
+                    }
+                }
+            } catch (error) {
+                // 忽略错误，保持默认显示
+                console.log('Status check failed:', error);
+            }
+        }
+
+        // 添加平滑滚动效果
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+    </script>
+</body>
+</html>

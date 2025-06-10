@@ -178,7 +178,7 @@
 
         <div class="links">
             <a href="/login.html">已有账号？登录</a>
-            <a href="/index.html">返回首页</a>
+            <a href="/home.html">返回首页</a>
         </div>
     </div>
 
@@ -207,7 +207,11 @@
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
+                        'Cache-Control': 'no-cache',
+                        'Pragma': 'no-cache'
                     },
+                    credentials: 'same-origin',
+                    mode: 'cors',
                     body: JSON.stringify({
                         username: username,
                         email: email,
@@ -226,7 +230,11 @@
                     showMessage(result.error || '注册失败', 'error');
                 }
             } catch (error) {
-                showMessage('网络错误：' + error.message, 'error');
+                if (error.name === 'TypeError' && error.message.includes('fetch')) {
+                    showMessage('连接失败，请检查网络设置', 'error');
+                } else {
+                    showMessage('网络错误：' + error.message, 'error');
+                }
             } finally {
                 registerBtn.disabled = false;
                 registerBtn.textContent = '注册';
