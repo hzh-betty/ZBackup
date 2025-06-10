@@ -18,9 +18,9 @@ namespace zbackup
     };
 
     // 便利的日志宏定义 - 使用fmt库格式
-#define ZBACKUP_LOG_DEBUG(fmt, ...) zbackup::backup_logger->debug(fmt, ##__VA_ARGS__)
-#define ZBACKUP_LOG_INFO(fmt, ...) zbackup::backup_logger->info(fmt, ##__VA_ARGS__)
-#define ZBACKUP_LOG_WARN(fmt, ...) zbackup::backup_logger->warn(fmt, ##__VA_ARGS__)
-#define ZBACKUP_LOG_ERROR(fmt, ...) zbackup::backup_logger->error(fmt, ##__VA_ARGS__)
-#define ZBACKUP_LOG_FATAL(fmt, ...) zbackup::backup_logger->fatal(fmt, ##__VA_ARGS__)
+#define ZBACKUP_LOG_DEBUG(fmt, ...) zbackup::backup_logger->ZLOG_DEBUG(fmt, ##__VA_ARGS__)
+#define ZBACKUP_LOG_INFO(fmt, ...) zbackup::backup_logger->ZLOG_INFO(fmt, ##__VA_ARGS__)
+#define ZBACKUP_LOG_WARN(fmt, ...) zbackup::backup_logger->ZLOG_WARN(fmt, ##__VA_ARGS__)
+#define ZBACKUP_LOG_ERROR(fmt, ...) zbackup::backup_logger->ZLOG_ERROR(fmt, ##__VA_ARGS__)
+#define ZBACKUP_LOG_FATAL(fmt, ...) zbackup::backup_logger->ZLOG_FATAL(fmt, ##__VA_ARGS__)
 };

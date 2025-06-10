@@ -22,7 +22,8 @@ namespace zbackup
     {
     public:
         using ptr = std::shared_ptr<BackupServer>;
-        
+        using HandlerPtr = zhttp::zrouter::Router::HandlerPtr;
+
         BackupServer(Compress::ptr comp, Storage::ptr storage);
         void run();
 
@@ -32,21 +33,20 @@ namespace zbackup
         std::string download_prefix_;
         std::unique_ptr<zhttp::HttpServer> server_;
         BackupLooper::ptr looper_;
-    
+
         // 用户管理
         UserManager::ptr user_manager_;
-    
+
         // 处理器
-        std::shared_ptr<UploadHandler> upload_handler_;
-        std::shared_ptr<ListShowHandler> list_show_handler_;
-        std::shared_ptr<DownloadHandler> download_handler_;
-        std::shared_ptr<DeleteHandler> delete_handler_;
-        std::shared_ptr<StaticHandler> static_handler_;
-        
+        HandlerPtr upload_handler_;
+        HandlerPtr list_show_handler_;
+        HandlerPtr download_handler_;
+        HandlerPtr delete_handler_;
+        HandlerPtr static_handler_;
+
         // 认证处理器
-        std::shared_ptr<LoginHandler> login_handler_;
-        std::shared_ptr<RegisterHandler> register_handler_;
-        std::shared_ptr<LogoutHandler> logout_handler_;
-        std::shared_ptr<AuthMiddleware> auth_middleware_;
+        HandlerPtr login_handler_;
+        HandlerPtr register_handler_;
+        HandlerPtr logout_handler_;
     };
 }

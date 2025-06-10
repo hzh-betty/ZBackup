@@ -1,8 +1,9 @@
 #include "../../include/user/user_manager.h"
 #include "../../include/config/config.h"
-#include <openssl/sha.h>
+#include "../../include/log/logger.h"
 #include <iomanip>
 #include <sstream>
+#include <functional>
 
 namespace zbackup
 {
@@ -213,16 +214,13 @@ namespace zbackup
 
     std::string UserManager::hash_password(const std::string& password)
     {
-        unsigned char hash[SHA256_DIGEST_LENGTH];
-        SHA256_CTX sha256;
-        SHA256_Init(&sha256);
-        SHA256_Update(&sha256, password.c_str(), password.size());
-        SHA256_Final(hash, &sha256);
-
+        // 使用 std::hash 进行哈希
+        std::hash<std::string> hasher;
+        size_t hash_value = hasher(password);
+        
+        // 将哈希值转换为十六进制字符串
         std::stringstream ss;
-        for (int i = 0; i < SHA256_DIGEST_LENGTH; i++) {
-            ss << std::hex << std::setw(2) << std::setfill('0') << (int)hash[i];
-        }
+        ss << std::hex << hash_value;
         return ss.str();
     }
 

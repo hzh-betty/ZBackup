@@ -1,6 +1,8 @@
 #include "../../include/server/server.h"
 #include "../../include/config/config.h"
-
+#include "../../ZHttpServer/include/middleware/middleware.h"
+#include "../../ZHttpServer/include/session/session_manager.h"
+#include "../../ZHttpServer/include/db_pool/redis_pool.h"
 namespace zbackup
 {
     // 备份服务器构造函数，初始化所有组件
@@ -9,7 +11,14 @@ namespace zbackup
     {
         // 初始化数据管理器单例
         DataManager::get_instance(storage);
-        
+
+        zhttp::zdb::RedisConnectionPool::get_instance().init("127.0.0.1"
+        );
+
+        // 初始化会话管理器
+        zhttp::zsession::SessionManager::get_instance()
+            .set_session_storage(zhttp::zsession::StorageFactory<zhttp::zsession::DbSessionStorage>::create());
+
         // 初始化用户管理器
         user_manager_ = std::make_shared<UserManager>();
         
@@ -36,7 +45,7 @@ namespace zbackup
         download_handler_ = std::make_shared<DownloadHandler>(comp);
         delete_handler_ = std::make_shared<DeleteHandler>(comp);
         static_handler_ = std::make_shared<StaticHandler>(comp);
-        
+
         // 创建认证相关处理器
         login_handler_ = std::make_shared<LoginHandler>(comp, user_manager_);
         register_handler_ = std::make_shared<RegisterHandler>(comp, user_manager_);
