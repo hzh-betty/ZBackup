@@ -4,10 +4,11 @@
 
 namespace zbackup
 {
-    class StaticHandler : public BaseHandler
+    class StaticHandler final : public BaseHandler
     {
     public:
         explicit StaticHandler(Compress::ptr comp);
+
         void handle_request(const zhttp::HttpRequest &req, zhttp::HttpResponse *rsp) override;
 
     private:

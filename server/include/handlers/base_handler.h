@@ -10,7 +10,7 @@ namespace zbackup
     class BaseHandler : public zhttp::zrouter::RouterHandler
     {
     protected:
-        BaseHandler(Compress::ptr comp);
+        explicit BaseHandler(Compress::ptr comp);
         virtual void handle_request(const zhttp::HttpRequest &req, zhttp::HttpResponse *rsp){}
 
         // 获取 ETag

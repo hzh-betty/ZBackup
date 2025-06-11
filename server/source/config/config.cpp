@@ -49,7 +49,7 @@ namespace zbackup
         use_ssl_ = value.value("use_ssl", false);
         cert_file_path_ = value.value("cert_file_path", "");
         key_file_path_ = value.value("key_file_path", "");
-        
+
         // 读取数据库配置
         db_host_ = value.value("db_host", "localhost");
         db_port_ = value.value("db_port", 3306);
@@ -131,7 +131,7 @@ namespace zbackup
     {
         return key_file_path_;
     }
-    
+
     // 新增数据库配置获取方法实现
     std::string Config::get_db_host() const
     {

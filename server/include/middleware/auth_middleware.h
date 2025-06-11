@@ -7,11 +7,11 @@
 namespace zbackup
 {
     // 认证中间件
-    class AuthMiddleware : public zhttp::zmiddleware::Middleware
+    class AuthMiddleware final : public zhttp::zmiddleware::Middleware
     {
     public:
         AuthMiddleware();
-        
+
         // 请求前处理
         void before(zhttp::HttpRequest &request) override;
 

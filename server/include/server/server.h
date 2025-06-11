@@ -24,7 +24,8 @@ namespace zbackup
         using ptr = std::shared_ptr<BackupServer>;
         using HandlerPtr = zhttp::zrouter::Router::HandlerPtr;
 
-        BackupServer(Compress::ptr comp, Storage::ptr storage);
+        BackupServer(const Compress::ptr &comp, const Storage::ptr &storage);
+
         void run();
 
     private:
@@ -36,7 +37,7 @@ namespace zbackup
 
         // 用户管理
         UserManager::ptr user_manager_;
-        
+
         // 处理器
         HandlerPtr upload_handler_;
         HandlerPtr list_show_handler_;

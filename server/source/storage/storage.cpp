@@ -22,7 +22,7 @@ namespace zbackup
         real_path_ = real_path;
         pack_path_ = pack_dir + fu.get_name() + pack_suffix;
         url_ = down_str + fu.get_name();
-        
+
         ZBACKUP_LOG_DEBUG("Backup info created: {} -> {}", real_path, url_);
         return true;
     }
@@ -30,7 +30,8 @@ namespace zbackup
     FileStorage::FileStorage()
     {
         backup_file_ = Config::get_instance().get_backup_file();
-        if (!init_load()) {
+        if (!FileStorage::init_load())
+        {
             ZBACKUP_LOG_FATAL("Failed to initialize file storage");
             throw std::runtime_error("FileStorage initialization failed");
         }
@@ -145,7 +146,8 @@ namespace zbackup
             return false;
         }
 
-        if (body.empty()) {
+        if (body.empty())
+        {
             ZBACKUP_LOG_INFO("Backup file is empty, starting with clean state");
             return true;
         }
@@ -157,7 +159,7 @@ namespace zbackup
             return false;
         }
 
-        for (auto &item : root)
+        for (auto &item: root)
         {
             BackupInfo info;
             info.fsize_ = item.value("fsize_", 0);
@@ -180,7 +182,7 @@ namespace zbackup
         get_all(&array);
 
         nlohmann::json root = nlohmann::json::array();
-        for (const auto &info : array)
+        for (const auto &info: array)
         {
             nlohmann::json item;
             item["pack_flag_"] = info.pack_flag_;

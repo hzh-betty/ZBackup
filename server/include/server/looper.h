@@ -11,15 +11,20 @@ namespace zbackup
     {
     public:
         using ptr = std::shared_ptr<BackupLooper>;
-        
-        BackupLooper(Compress::ptr comp);
+
+        explicit BackupLooper(Compress::ptr comp);
+
         ~BackupLooper();
-        void start();
+
+        void start() const;
 
     private:
-        void hot_monitor();
-        void deal_task(const std::string &str);
-        bool hot_judge(const std::string &filename, int hot_time);
+        void hot_monitor() const;
+
+        void deal_task(const std::string &str) const;
+
+        static bool hot_judge(const std::string &filename, int hot_time);
+
     private:
         std::atomic<bool> stop_;
         Compress::ptr comp_;

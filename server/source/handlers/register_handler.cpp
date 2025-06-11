@@ -1,11 +1,14 @@
 #include "../../include/handlers/register_handler.h"
 #include "../../include/config/config.h"
 #include <nlohmann/json.hpp>
+#include <utility>
 
 namespace zbackup
 {
     RegisterHandler::RegisterHandler(Compress::ptr comp, UserManager::ptr user_manager)
-        : BaseHandler(comp), user_manager_(user_manager) {}
+        : BaseHandler(std::move(comp)), user_manager_(std::move(user_manager))
+    {
+    }
 
     void RegisterHandler::handle_request(const zhttp::HttpRequest &req, zhttp::HttpResponse *rsp)
     {

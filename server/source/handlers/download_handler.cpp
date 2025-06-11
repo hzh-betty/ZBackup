@@ -1,9 +1,13 @@
+#include <utility>
+
 #include "../../include/handlers/download_handler.h"
 
 namespace zbackup
 {
     // 下载处理器构造函数
-    DownloadHandler::DownloadHandler(Compress::ptr comp) : BaseHandler(comp) {}
+    DownloadHandler::DownloadHandler(Compress::ptr comp) : BaseHandler(std::move(comp))
+    {
+    }
 
     // 处理文件下载请求，支持断点续传
     void DownloadHandler::handle_request(const zhttp::HttpRequest &req, zhttp::HttpResponse *rsp)
@@ -42,10 +46,20 @@ namespace zbackup
             {
                 ZBACKUP_LOG_WARN("Failed to remove pack file after decompression: {}", info.pack_path_);
             }
-            
+
             info.pack_flag_ = false;
-            data_manager_->update(info);
-            data_manager_->persistence();
+            if (data_manager_->update(info) == false)
+            {
+                ZBACKUP_LOG_WARN("Failed to update backup info after decompression: {}", info.real_path_);
+            }
+            if (data_manager_->persistence() == false)
+            {
+                ZBACKUP_LOG_ERROR("Failed to persist backup info after decompression: {}", info.real_path_);
+                rsp->set_status_code(zhttp::HttpResponse::StatusCode::InternalServerError);
+                rsp->set_status_message("Internal Server Error");
+                rsp->set_body("Persistence failed");
+                return;
+            }
         }
 
         // 检查是否需要断点续传
@@ -66,12 +80,12 @@ namespace zbackup
     }
 
     // 处理断点续传请求
-    void DownloadHandler::handle_range_request(const zhttp::HttpRequest &req, zhttp::HttpResponse *rsp, 
-                           const BackupInfo &info, FileUtil &fu, int64_t file_size, 
-                           const std::string &range_header)
+    void DownloadHandler::handle_range_request(const zhttp::HttpRequest &req, zhttp::HttpResponse *rsp,
+                                               const BackupInfo &info, FileUtil &fu, int64_t file_size,
+                                               const std::string &range_header)
     {
         ZBACKUP_LOG_DEBUG("Range request: {}", range_header);
-        
+
         // 解析 Range: bytes=start-end
         size_t eq_pos = range_header.find('=');
         size_t dash_pos = range_header.find('-');
@@ -87,7 +101,7 @@ namespace zbackup
         std::string start_str = range_header.substr(eq_pos + 1, dash_pos - eq_pos - 1);
         std::string end_str = range_header.substr(dash_pos + 1);
         size_t start = 0, end = file_size - 1;
-        
+
         try
         {
             start = std::stoull(start_str);
@@ -131,7 +145,7 @@ namespace zbackup
         rsp->set_header("Accept-Ranges", "bytes");
         rsp->set_header("ETag", get_etag(info));
         rsp->set_header("Content-Range",
-            "bytes " + std::to_string(start) + "-" + std::to_string(end) + "/" + std::to_string(file_size));
+                        "bytes " + std::to_string(start) + "-" + std::to_string(end) + "/" + std::to_string(file_size));
         rsp->set_content_length(len);
         ZBACKUP_LOG_INFO("Partial download: {} [{}-{}] of {} bytes", info.real_path_, start, end, file_size);
     }
@@ -148,7 +162,7 @@ namespace zbackup
             rsp->set_body("Read file failed");
             return;
         }
-        
+
         rsp->set_status_code(zhttp::HttpResponse::StatusCode::OK);
         rsp->set_status_message("OK");
         rsp->set_content_type("application/octet-stream");
@@ -156,7 +170,7 @@ namespace zbackup
         rsp->set_header("Accept-Ranges", "bytes");
         rsp->set_header("ETag", get_etag(info));
         rsp->set_content_length(file_content.size());
-        
+
         ZBACKUP_LOG_INFO("Full download completed: {} ({} bytes)", info.real_path_, file_content.size());
     }
 }

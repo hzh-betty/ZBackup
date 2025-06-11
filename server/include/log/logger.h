@@ -1,8 +1,10 @@
 #pragma once
 #include "../../ZHttpServer/zlog/zlog.h"
+
 namespace zbackup
 {
     inline zlog::Logger::ptr backup_logger;
+
     class Log
     {
     public:

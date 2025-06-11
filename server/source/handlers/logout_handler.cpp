@@ -1,17 +1,18 @@
 #include "../../include/handlers/logout_handler.h"
 #include "../../ZHttpServer/include/session/session_manager.h"
 #include <nlohmann/json.hpp>
+#include <utility>
 
 namespace zbackup
 {
-    LogoutHandler::LogoutHandler(Compress::ptr comp) : BaseHandler(comp) {}
+    LogoutHandler::LogoutHandler(Compress::ptr comp) : BaseHandler(std::move(comp)) {}
 
     void LogoutHandler::handle_request(const zhttp::HttpRequest &req, zhttp::HttpResponse *rsp)
     {
         auto session = zhttp::zsession::SessionManager::get_instance().get_session(req, rsp);
 
         std::string username = session->get_attribute("username");
-        
+
         // 销毁会话
         zhttp::zsession::SessionManager::get_instance().destroy_session(session->get_session_id());
 

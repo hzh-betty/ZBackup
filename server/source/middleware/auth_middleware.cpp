@@ -3,7 +3,7 @@
 
 namespace zbackup
 {
-    AuthMiddleware::AuthMiddleware() {}
+    AuthMiddleware::AuthMiddleware() = default;
 
     void AuthMiddleware::before(zhttp::HttpRequest &req)
     {
@@ -19,15 +19,18 @@ namespace zbackup
 
     bool AuthMiddleware::is_authenticated(const zhttp::HttpRequest &req)
     {
-        try {
+        try
+        {
             zhttp::HttpResponse dummy_response;
             auto session = zhttp::zsession::SessionManager::get_instance().get_session(req, &dummy_response);
-            
+
             auto logged_in = session->get_attribute("logged_in");
             auto username = session->get_attribute("username");
-            
+
             return logged_in == "true" && !username.empty();
-        } catch (const std::exception& e) {
+        }
+        catch (const std::exception &e)
+        {
             ZBACKUP_LOG_ERROR("Error checking authentication: {}", e.what());
             return false;
         }

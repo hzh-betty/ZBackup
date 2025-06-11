@@ -1,9 +1,10 @@
+#include <utility>
 #include "../../include/util/util.h"
 
 namespace zbackup
 {
     // 文件工具类构造函数
-    FileUtil::FileUtil(const std::string &pathname) : pathname_(pathname)
+    FileUtil::FileUtil(std::string pathname) : pathname_(std::move(pathname))
     {
     }
 
@@ -82,7 +83,7 @@ namespace zbackup
     // 获取文件大小（字节）
     int64_t FileUtil::get_size() const
     {
-        struct stat st;
+        struct stat st{};
         if (stat(pathname_.c_str(), &st) < 0)
         {
             ZBACKUP_LOG_WARN("Failed to get file size [{}]: {}", pathname_, strerror(errno));
@@ -94,7 +95,7 @@ namespace zbackup
     // 获取文件最后修改时间
     time_t FileUtil::get_last_mtime() const
     {
-        struct stat st;
+        struct stat st{};
         if (stat(pathname_.c_str(), &st) < 0)
         {
             ZBACKUP_LOG_WARN("Failed to get file mtime [{}]: {}", pathname_, strerror(errno));
@@ -106,7 +107,7 @@ namespace zbackup
     // 获取文件最后访问时间
     time_t FileUtil::get_last_atime() const
     {
-        struct stat st;
+        struct stat st{};
         if (stat(pathname_.c_str(), &st) < 0)
         {
             ZBACKUP_LOG_WARN("Failed to get file atime [{}]: {}", pathname_, strerror(errno));
@@ -119,7 +120,7 @@ namespace zbackup
     std::string FileUtil::get_name() const
     {
         std::string filename;
-        size_t pos = pathname_.find_last_of("/");
+        size_t pos = pathname_.find_last_of('/');
         if (pos == std::string::npos)
         {
             filename = pathname_;
@@ -134,7 +135,7 @@ namespace zbackup
     // 读取文件指定位置和长度的内容
     bool FileUtil::get_pos_len(std::string *body, size_t pos, size_t len)
     {
-        if(exists() == false)
+        if (exists() == false)
         {
             ZBACKUP_LOG_WARN("File not exists: {}", pathname_);
             return false;
@@ -143,7 +144,8 @@ namespace zbackup
         int64_t file_size = get_size();
         if (pos + len > file_size)
         {
-            ZBACKUP_LOG_WARN("Read range out of bounds [{}]: pos={}, len={}, file_size={}", pathname_, pos, len, file_size);
+            ZBACKUP_LOG_WARN("Read range out of bounds [{}]: pos={}, len={}, file_size={}", pathname_, pos, len,
+                             file_size);
             return false;
         }
 
@@ -157,7 +159,7 @@ namespace zbackup
 
         ifs.seekg(pos, std::ios::beg);
         body->resize(len);
-        ifs.read(&(*body)[0], len);
+        ifs.read(&(*body)[0], (size_t) len);
 
         if (!ifs.good())
         {
@@ -202,7 +204,7 @@ namespace zbackup
     }
 
     // 检查文件或目录是否存在
-    bool FileUtil::exists()
+    bool FileUtil::exists() const
     {
         return fs::exists(pathname_);
     }
@@ -220,6 +222,7 @@ namespace zbackup
         ZBACKUP_LOG_DEBUG("File created successfully: {}", pathname_);
         return true;
     }
+
     // 创建目录（递归创建）
     bool FileUtil::create_directory()
     {
@@ -240,8 +243,9 @@ namespace zbackup
     // 浏览目录
     void FileUtil::scan_directory(std::vector<std::string> *arry)
     {
-        try {
-            for (auto &p : fs::directory_iterator(pathname_))
+        try
+        {
+            for (auto &p: fs::directory_iterator(pathname_))
             {
                 if (fs::is_directory(p))
                     continue;
@@ -250,7 +254,8 @@ namespace zbackup
             }
             ZBACKUP_LOG_DEBUG("Directory scanned: {} files found in {}", arry->size(), pathname_);
         }
-        catch (const std::exception& e) {
+        catch (const std::exception &e)
+        {
             ZBACKUP_LOG_ERROR("Failed to scan directory [{}]: {}", pathname_, e.what());
         }
     }

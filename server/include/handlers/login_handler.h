@@ -5,10 +5,11 @@
 namespace zbackup
 {
     // 登录处理器
-    class LoginHandler : public BaseHandler
+    class LoginHandler final : public BaseHandler
     {
     public:
         LoginHandler(Compress::ptr comp, UserManager::ptr user_manager);
+
         void handle_request(const zhttp::HttpRequest &req, zhttp::HttpResponse *rsp) override;
 
     private:

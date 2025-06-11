@@ -1,8 +1,10 @@
+#include <utility>
+
 #include "../../include/handlers/base_handler.h"
 
 namespace zbackup
 {
-    BaseHandler::BaseHandler(Compress::ptr comp) : comp_(comp)
+    BaseHandler::BaseHandler(Compress::ptr comp) : comp_(std::move(comp))
     {
         data_manager_ = DataManager::get_instance();
     }
@@ -23,7 +25,8 @@ namespace zbackup
     {
         std::string tmp = std::ctime(&t);
         // 移除末尾的换行符
-        if (!tmp.empty() && tmp.back() == '\n') {
+        if (!tmp.empty() && tmp.back() == '\n')
+        {
             tmp.pop_back();
         }
         return tmp;

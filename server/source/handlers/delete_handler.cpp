@@ -1,8 +1,12 @@
+#include <utility>
+
 #include "../../include/handlers/delete_handler.h"
 
 namespace zbackup
 {
-    DeleteHandler::DeleteHandler(Compress::ptr comp) : BaseHandler(comp) {}
+    DeleteHandler::DeleteHandler(Compress::ptr comp) : BaseHandler(std::move(comp))
+    {
+    }
 
     void DeleteHandler::handle_request(const zhttp::HttpRequest &req, zhttp::HttpResponse *rsp)
     {
@@ -65,6 +69,6 @@ namespace zbackup
         rsp->set_status_code(zhttp::HttpResponse::StatusCode::OK);
         rsp->set_status_message("OK");
         rsp->set_content_type("application/json");
-        rsp->set_body("{\"success\": true, \"message\": \"File deleted successfully\"}");
+        rsp->set_body(R"({"success": true, "message": "File deleted successfully"})");
     }
 }

@@ -1,21 +1,26 @@
+#include <utility>
 #include "../../include/server/looper.h"
 #include "../../include/config/config.h"
+#include "../../include/core/threadpool.h"
 
 namespace zbackup
 {
     // 后台循环构造函数，启动热点文件监控
     BackupLooper::BackupLooper(Compress::ptr comp)
-        : stop_(false), comp_(comp)
+        : stop_(false), comp_(std::move(std::move(comp)))
     {
         ZBACKUP_LOG_INFO("BackupLooper initialized");
     }
 
-    void BackupLooper::start()
+    void BackupLooper::start() const
     {
-        std::thread monitor_thread(&BackupLooper::hot_monitor, this);
-        monitor_thread.detach(); // 分离线程，允许其在后台运行
+        zbackup::ThreadPool::get_instance()->submit_task([this]()
+        {
+            hot_monitor();
+        });
         ZBACKUP_LOG_INFO("BackupLooper started monitoring for hot files");
     }
+
     // 析构函数，停止监控循环
     BackupLooper::~BackupLooper()
     {
@@ -24,16 +29,15 @@ namespace zbackup
     }
 
     // 热点文件监控主循环
-    void BackupLooper::hot_monitor()
+    void BackupLooper::hot_monitor() const
     {
         // 读取配置
         Config &config = Config::get_instance();
         std::string back_dir = config.get_back_dir();
         int hot_time = config.get_hot_time();
-        DataManager* data_manager = DataManager::get_instance();
-        
+
         ZBACKUP_LOG_INFO("Hot file monitor started, checking every 1s for files idle > {}s", hot_time);
-        
+
         // 持续监控循环
         while (!stop_)
         {
@@ -44,29 +48,32 @@ namespace zbackup
 
             int hot_file_count = 0;
             // 2. 判断是否为热点文件
-            for (auto &str : arry)
+            for (auto &str: arry)
             {
                 if (hot_judge(str, hot_time) == false)
                     continue;
-                    
+
                 hot_file_count++;
                 ThreadPool::get_instance()->submit_task([this, str]()
-                                                      { this->deal_task(str); });
+                {
+                    this->deal_task(str);
+                });
             }
-            
-            if (hot_file_count > 0) {
+
+            if (hot_file_count > 0)
+            {
                 ZBACKUP_LOG_INFO("Found {} hot files to compress", hot_file_count);
             }
-            
+
             std::this_thread::sleep_for(std::chrono::seconds(1));
         }
     }
 
     // 处理热点文件的压缩任务
-    void BackupLooper::deal_task(const std::string &str)
+    void BackupLooper::deal_task(const std::string &str) const
     {
-        DataManager* data_manager = DataManager::get_instance();
-        
+        DataManager *data_manager = DataManager::get_instance();
+
         // 3. 获取文件信息
         BackupInfo bi;
         if (data_manager->get_one_by_real_path(str, &bi) == false)
@@ -104,12 +111,12 @@ namespace zbackup
             ZBACKUP_LOG_ERROR("Failed to persist backup info for: {}", str);
             return;
         }
-        
+
         ZBACKUP_LOG_INFO("Hot file compressed successfully: {}", str);
     }
 
     // 判断文件是否为热点文件（长时间未访问）
-    bool BackupLooper::hot_judge(const std::string &filename, int hot_time)
+    bool BackupLooper::hot_judge(const std::string &filename, const int hot_time)
     {
         FileUtil fu(filename);
         time_t last_atime = fu.get_last_atime();

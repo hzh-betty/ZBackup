@@ -7,7 +7,7 @@
     "pack_dir": "../packdir/",
     "back_dir": "../backdir/",
     "backup_file": "../config/data.json",
-    "use_ssl": false,
+    "use_ssl": true,
     "cert_file_path": "/home/betty/ssl/server.crt",
     "key_file_path": "/home/betty/ssl/server.key",
     "db_host": "127.0.0.1",

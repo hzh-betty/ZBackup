@@ -28,8 +28,8 @@ namespace zbackup
             return false;
         }
 
-        ZBACKUP_LOG_INFO("File compressed: {} -> {} ({} -> {} bytes)", 
-                        pathname, packname, body.size(), packed.size());
+        ZBACKUP_LOG_INFO("File compressed: {} -> {} ({} -> {} bytes)",
+                         pathname, packname, body.size(), packed.size());
         return true;
     }
 
@@ -65,9 +65,9 @@ namespace zbackup
             ZBACKUP_LOG_ERROR("Failed to write decompressed data to: {}", pathname);
             return false;
         }
-        
-        ZBACKUP_LOG_INFO("File decompressed: {} -> {} ({} -> {} bytes)", 
-                        packname, pathname, body.size(), unpacked.size());
+
+        ZBACKUP_LOG_INFO("File decompressed: {} -> {} ({} -> {} bytes)",
+                         packname, pathname, body.size(), unpacked.size());
         return true;
     }
 }

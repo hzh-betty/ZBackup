@@ -1,9 +1,13 @@
+#include <utility>
+
 #include "../../include/handlers/listshow_handler.h"
 
 namespace zbackup
 {
     // 列表展示处理器构造函数
-    ListShowHandler::ListShowHandler(Compress::ptr comp) : BaseHandler(comp) {}
+    ListShowHandler::ListShowHandler(Compress::ptr comp) : BaseHandler(std::move(comp))
+    {
+    }
 
     // 处理文件列表展示请求，生成HTML页面
     void ListShowHandler::handle_request(const zhttp::HttpRequest &req, zhttp::HttpResponse *rsp)
@@ -17,7 +21,7 @@ namespace zbackup
         std::stringstream ss;
         ss << "<html><head><title>Download</title></head>";
         ss << "<body><h1>Download</h1><table>";
-        for (auto &a : arry)
+        for (auto &a: arry)
         {
             ss << "<tr>";
             std::string filename = FileUtil(a.real_path_).get_name();
@@ -27,7 +31,7 @@ namespace zbackup
             ss << "</tr>";
         }
         ss << "</table></body></html>";
-        
+
         // 设置响应
         rsp->set_status_code(zhttp::HttpResponse::StatusCode::OK);
         rsp->set_status_message("OK");

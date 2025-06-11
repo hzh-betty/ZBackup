@@ -1,9 +1,14 @@
+#include <utility>
+
 #include "../../include/handlers/upload_handler.h"
 #include "../../include/config/config.h"
+#include "../../include/log/logger.h"
 
 namespace zbackup
 {
-    UploadHandler::UploadHandler(Compress::ptr comp) : BaseHandler(comp) {}
+    UploadHandler::UploadHandler(Compress::ptr comp) : BaseHandler(std::move(comp))
+    {
+    }
 
     void UploadHandler::handle_request(const zhttp::HttpRequest &req, zhttp::HttpResponse *rsp)
     {
@@ -12,7 +17,7 @@ namespace zbackup
 
         std::string content_type = req.get_header("Content-Type");
         ZBACKUP_LOG_DEBUG("Upload request received, Content-Type: {}", content_type);
-        
+
         if (content_type.find("multipart/form-data") != std::string::npos)
         {
             if (!parse_multipart_data(req, filename, file_content))
@@ -39,7 +44,7 @@ namespace zbackup
         }
 
         ZBACKUP_LOG_INFO("File upload started: {} ({} bytes)", filename, file_content.size());
-        
+
         if (!save_file(filename, file_content))
         {
             ZBACKUP_LOG_ERROR("Failed to save uploaded file: {}", filename);
@@ -55,10 +60,11 @@ namespace zbackup
         rsp->set_body("The file was uploaded successfully");
     }
 
-    bool UploadHandler::parse_multipart_data(const zhttp::HttpRequest &req, std::string &filename, std::string &file_content)
+    bool UploadHandler::parse_multipart_data(const zhttp::HttpRequest &req, std::string &filename,
+                                             std::string &file_content)
     {
         std::string content_type = req.get_header("Content-Type");
-        
+
         std::smatch match;
         std::regex boundary_re("boundary=([^\r\n;]+)");
         if (!std::regex_search(content_type, match, boundary_re) || match.size() < 2)
@@ -66,11 +72,11 @@ namespace zbackup
             ZBACKUP_LOG_WARN("Multipart boundary not found in Content-Type: {}", content_type);
             return false;
         }
-        
+
         std::string boundary = "--" + match[1].str();
         const std::string &body = req.get_content();
         ZBACKUP_LOG_DEBUG("Parsing multipart data with boundary: {}", boundary);
-        
+
         size_t pos = 0;
         while ((pos = body.find(boundary, pos)) != std::string::npos)
         {
@@ -84,7 +90,7 @@ namespace zbackup
             size_t content_start = header_end + 4;
             size_t next_boundary = body.find(boundary, content_start);
             if (next_boundary == std::string::npos) break;
-            
+
             size_t content_len = next_boundary - content_start;
             std::string part_content = body.substr(content_start, content_len);
 
@@ -108,7 +114,7 @@ namespace zbackup
         return false;
     }
 
-    bool UploadHandler::save_file(const std::string &filename, const std::string &file_content)
+    bool UploadHandler::save_file(const std::string &filename, const std::string &file_content) const
     {
         std::string back_dir = Config::get_instance().get_back_dir();
         std::string real_path = back_dir + FileUtil(filename).get_name();
@@ -126,19 +132,19 @@ namespace zbackup
             ZBACKUP_LOG_ERROR("Failed to create backup info for: {}", real_path);
             return false;
         }
-        
+
         if (data_manager_->insert(info) == false)
         {
             ZBACKUP_LOG_ERROR("Failed to insert backup info for: {}", real_path);
             return false;
         }
-        
+
         if (data_manager_->persistence() == false)
         {
             ZBACKUP_LOG_ERROR("Failed to persist backup info for: {}", real_path);
             return false;
         }
-        
+
         return true;
     }
 }

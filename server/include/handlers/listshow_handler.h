@@ -4,7 +4,7 @@
 
 namespace zbackup
 {
-    class ListShowHandler : public BaseHandler
+    class ListShowHandler final : public BaseHandler
     {
     public:
         explicit ListShowHandler(Compress::ptr comp);
