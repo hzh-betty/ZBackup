@@ -1,11 +1,11 @@
 #include "../../include/handlers/logout_handler.h"
-#include "../../ZHttpServer/include/session/session_manager.h"
+#include "../../../ZHttpServer/include/session/session_manager.h"
 #include <nlohmann/json.hpp>
 #include <utility>
 
 namespace zbackup
 {
-    LogoutHandler::LogoutHandler(Compress::ptr comp) : BaseHandler(std::move(comp)) {}
+    LogoutHandler::LogoutHandler() = default;
 
     void LogoutHandler::handle_request(const zhttp::HttpRequest &req, zhttp::HttpResponse *rsp)
     {

@@ -1,14 +1,13 @@
 #include <utility>
-
+#include <ctime>
+#include "../../include/log/logger.h"
 #include "../../include/handlers/base_handler.h"
+#include "../../include/storage/storage.h"
+#include "../../include/data/data_manage.h"
+#include "../../include/compress/compress.h"
 
 namespace zbackup
 {
-    BaseHandler::BaseHandler(Compress::ptr comp) : comp_(std::move(comp))
-    {
-        data_manager_ = DataManager::get_instance();
-    }
-
     std::string BaseHandler::get_etag(const BackupInfo &info)
     {
         FileUtil fu(info.real_path_);
@@ -25,10 +24,19 @@ namespace zbackup
     {
         std::string tmp = std::ctime(&t);
         // 移除末尾的换行符
-        if (!tmp.empty() && tmp.back() == '\n')
-        {
+        if (!tmp.empty() && tmp.back() == '\n') {
             tmp.pop_back();
         }
         return tmp;
+    }
+
+    DataHandler::DataHandler()
+    {
+        data_manager_ = DataManager::get_instance();
+    }
+
+    CompressHandler::CompressHandler(std::shared_ptr<Compress> comp) 
+        : comp_(std::move(comp))
+    {
     }
 }

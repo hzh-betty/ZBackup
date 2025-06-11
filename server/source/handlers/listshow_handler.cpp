@@ -1,13 +1,12 @@
 #include <utility>
 
 #include "../../include/handlers/listshow_handler.h"
+#include "../../include/storage/storage.h"
 
 namespace zbackup
 {
     // 列表展示处理器构造函数
-    ListShowHandler::ListShowHandler(Compress::ptr comp) : BaseHandler(std::move(comp))
-    {
-    }
+    ListShowHandler::ListShowHandler() = default;
 
     // 处理文件列表展示请求，生成HTML页面
     void ListShowHandler::handle_request(const zhttp::HttpRequest &req, zhttp::HttpResponse *rsp)

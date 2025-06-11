@@ -1,11 +1,13 @@
 #include <utility>
 
 #include "../../include/handlers/download_handler.h"
+#include "../../include/storage/storage.h"
+#include "../../include/compress/compress.h"
 
 namespace zbackup
 {
     // 下载处理器构造函数
-    DownloadHandler::DownloadHandler(Compress::ptr comp) : BaseHandler(std::move(comp))
+    DownloadHandler::DownloadHandler(std::shared_ptr<Compress> comp) : CompressHandler(std::move(comp))
     {
     }
 

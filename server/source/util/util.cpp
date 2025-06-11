@@ -1,5 +1,10 @@
 #include <utility>
 #include "../../include/util/util.h"
+#include "../../include/core/service_container.h"
+#include "../../../ZHttpServer/include/db_pool/mysql_pool.h"
+#include "../../../ZHttpServer/include/db_pool/redis_pool.h"
+#include "../../include/interfaces/core_interfaces.h"
+
 
 namespace zbackup
 {
@@ -288,5 +293,46 @@ namespace zbackup
             ZBACKUP_LOG_ERROR("JSON deserialize failed: {}", e.what());
             return false;
         }
+    }
+
+    void InitMysqlPool() {
+        auto& container = core::ServiceContainer::get_instance();
+        auto config = container.resolve<interfaces::IConfigManager>();
+        
+        auto& pool = zhttp::zdb::MysqlConnectionPool::get_instance();
+        pool.init(
+            config->get_string("mysql_host", "localhost"),
+            config->get_string("mysql_user", "root"),
+            config->get_string("mysql_password", ""),
+            config->get_string("mysql_db", "zbackup"),
+            config->get_int("mysql_pool_size", 10)
+        );
+        ZBACKUP_LOG_INFO("MySQL connection pool init success: {}@{}:{}/{} pool_size={}",
+            config->get_string("mysql_user", "root"), 
+            config->get_string("mysql_host", "localhost"), 
+            config->get_int("mysql_port", 3306),
+            config->get_string("mysql_db", "zbackup"), 
+            config->get_int("mysql_pool_size", 10));
+    }
+
+    void InitRedisPool() {
+        auto& container = core::ServiceContainer::get_instance();
+        auto config = container.resolve<interfaces::IConfigManager>();
+        
+        auto& pool = zhttp::zdb::RedisConnectionPool::get_instance();
+        pool.init(
+            config->get_string("redis_host", "127.0.0.1"),
+            config->get_int("redis_port", 6379),
+            config->get_string("redis_password", ""),
+            config->get_int("redis_db", 0),
+            config->get_int("redis_pool_size", 10),
+            config->get_int("redis_timeout_ms", 5000)
+        );
+        ZBACKUP_LOG_INFO("Redis connection pool init success: {}:{} db={} pool_size={} timeout_ms={}",
+            config->get_string("redis_host", "127.0.0.1"), 
+            config->get_int("redis_port", 6379),
+            config->get_int("redis_db", 0), 
+            config->get_int("redis_pool_size", 10),
+            config->get_int("redis_timeout_ms", 5000));
     }
 } // namespace zbackup

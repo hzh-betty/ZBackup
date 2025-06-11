@@ -1,7 +1,10 @@
 #include <utility>
 #include "../../include/server/looper.h"
-#include "../../include/config/config.h"
+#include "../../include/core/service_container.h"
 #include "../../include/core/threadpool.h"
+#include "../../include/compress/compress.h"
+#include "../../include/interfaces/core_interfaces.h"
+
 
 namespace zbackup
 {
@@ -31,10 +34,11 @@ namespace zbackup
     // 热点文件监控主循环
     void BackupLooper::hot_monitor() const
     {
-        // 读取配置
-        Config &config = Config::get_instance();
-        std::string back_dir = config.get_back_dir();
-        int hot_time = config.get_hot_time();
+        auto& container = core::ServiceContainer::get_instance();
+        auto config = container.resolve<interfaces::IConfigManager>();
+        
+        std::string back_dir = config->get_string("back_dir", "./backup/");
+        int hot_time = config->get_int("hot_time", 300);
 
         ZBACKUP_LOG_INFO("Hot file monitor started, checking every 1s for files idle > {}s", hot_time);
 

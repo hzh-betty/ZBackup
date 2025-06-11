@@ -1,5 +1,5 @@
 #include "../../include/user/user_manager.h"
-#include "../../include/config/config.h"
+#include "../../include/core/service_container.h"
 #include "../../include/log/logger.h"
 #include <iomanip>
 #include <sstream>
@@ -9,18 +9,6 @@ namespace zbackup
 {
     UserManager::UserManager() : mysql_pool_(zhttp::zdb::MysqlConnectionPool::get_instance())
     {
-        // 从配置获取数据库连接信息
-        Config &config = Config::get_instance();
-
-        // 使用单例连接池的init方法初始化
-        mysql_pool_.init(
-            config.get_db_host(),
-            config.get_db_user(),
-            config.get_db_password(),
-            config.get_db_name(),
-            10 // 连接池大小
-        );
-
         if (!mysql_pool_.is_initialized())
         {
             ZBACKUP_LOG_FATAL("Failed to initialize MySQL connection pool");

@@ -1,6 +1,6 @@
 #pragma once
 #include "../util/util.h"
-#include "../config/config.h"
+#include "../../../ZHttpServer/include/db_pool/mysql_pool.h"
 
 namespace zbackup
 {
@@ -77,5 +77,27 @@ namespace zbackup
     protected:
         std::unordered_map<std::string, BackupInfo> tables_; // 内存存储表
         std::string backup_file_; // 备份文件路径
+    };
+
+    // 数据库存储实现类
+    class DatabaseStorage final : public Storage
+    {
+    public:
+        DatabaseStorage();
+
+        bool insert(const BackupInfo &info) override;
+        bool update(const BackupInfo &info) override;
+        bool get_one_by_url(const std::string &url, BackupInfo *info) override;
+        bool get_one_by_real_path(const std::string &real_path, BackupInfo *info) override;
+        void get_all(std::vector<BackupInfo> *arry) override;
+        bool delete_one(const BackupInfo &info) override;
+        bool delete_by_url(const std::string &url) override;
+        bool delete_by_real_path(const std::string &real_path) override;
+
+    private:
+        bool init_load() override;
+        bool persistence() override;
+    private:
+        zhttp::zdb::MysqlConnectionPool* pool_ = &zhttp::zdb::MysqlConnectionPool::get_instance();
     };
 }

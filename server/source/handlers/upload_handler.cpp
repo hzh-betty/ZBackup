@@ -1,14 +1,12 @@
 #include <utility>
-
+#include "../../include/interfaces/core_interfaces.h"
 #include "../../include/handlers/upload_handler.h"
-#include "../../include/config/config.h"
+#include "../../include/core/service_container.h"
 #include "../../include/log/logger.h"
 
 namespace zbackup
 {
-    UploadHandler::UploadHandler(Compress::ptr comp) : BaseHandler(std::move(comp))
-    {
-    }
+    UploadHandler::UploadHandler() = default;
 
     void UploadHandler::handle_request(const zhttp::HttpRequest &req, zhttp::HttpResponse *rsp)
     {
@@ -116,7 +114,10 @@ namespace zbackup
 
     bool UploadHandler::save_file(const std::string &filename, const std::string &file_content) const
     {
-        std::string back_dir = Config::get_instance().get_back_dir();
+        auto& container = core::ServiceContainer::get_instance();
+        auto config = container.resolve<interfaces::IConfigManager>();
+        
+        std::string back_dir = config->get_string("back_dir", "./backup/");
         std::string real_path = back_dir + FileUtil(filename).get_name();
         FileUtil fu(real_path);
 

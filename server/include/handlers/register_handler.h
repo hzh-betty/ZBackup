@@ -9,7 +9,7 @@ namespace zbackup
     class RegisterHandler final : public BaseHandler
     {
     public:
-        RegisterHandler(Compress::ptr comp, UserManager::ptr user_manager);
+        explicit RegisterHandler(UserManager::ptr user_manager);
 
         void handle_request(const zhttp::HttpRequest &req, zhttp::HttpResponse *rsp) override;
 

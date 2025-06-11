@@ -10,9 +10,16 @@
     "use_ssl": true,
     "cert_file_path": "/home/betty/ssl/server.crt",
     "key_file_path": "/home/betty/ssl/server.key",
-    "db_host": "127.0.0.1",
-    "db_port": 3306,
-    "db_user": "betty",
-    "db_password": "betty",
-    "db_name": "zbackup"
+    "mysql_host": "127.0.0.1",
+    "mysql_port": 3306,
+    "mysql_user": "betty",
+    "mysql_password": "betty",
+    "mysql_db": "zbackup",
+    "mysql_pool_size": 10,
+    "redis_host": "127.0.0.1",
+    "redis_port": 6379,
+    "redis_password": "",
+    "redis_db": 0,
+    "redis_pool_size": 10,
+    "redis_timeout_ms": 5000
 }

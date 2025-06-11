@@ -1,13 +1,13 @@
 #include "../../include/handlers/login_handler.h"
 #include "../../include/config/config.h"
-#include "../../ZHttpServer/include/session/session_manager.h"
+#include "../../../ZHttpServer/include/session/session_manager.h"
 #include <nlohmann/json.hpp>
 #include <utility>
 
 namespace zbackup
 {
-    LoginHandler::LoginHandler(Compress::ptr comp, UserManager::ptr user_manager)
-        : BaseHandler(std::move(comp)), user_manager_(std::move(user_manager))
+    LoginHandler::LoginHandler(UserManager::ptr user_manager)
+        : user_manager_(std::move(user_manager))
     {
     }
 

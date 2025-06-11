@@ -3,10 +3,10 @@
 
 namespace zbackup
 {
-    class DownloadHandler final : public BaseHandler
+    class DownloadHandler final : public CompressHandler
     {
     public:
-        explicit DownloadHandler(Compress::ptr comp);
+        explicit DownloadHandler(std::shared_ptr<Compress> comp);
 
         void handle_request(const zhttp::HttpRequest &req, zhttp::HttpResponse *rsp) override;
 

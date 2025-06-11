@@ -51,4 +51,9 @@ namespace zbackup
         static bool serialize(const nlohmann::json &root, std::string *str); // 序列化
         static bool deserialize(nlohmann::json *root, const std::string &str); // 反序列化
     };
+
+    // 初始化MySQL连接池
+    void InitMysqlPool();
+    // 初始化Redis连接池
+    void InitRedisPool();
 }

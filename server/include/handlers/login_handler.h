@@ -8,7 +8,7 @@ namespace zbackup
     class LoginHandler final : public BaseHandler
     {
     public:
-        LoginHandler(Compress::ptr comp, UserManager::ptr user_manager);
+        explicit LoginHandler(UserManager::ptr user_manager);
 
         void handle_request(const zhttp::HttpRequest &req, zhttp::HttpResponse *rsp) override;
 

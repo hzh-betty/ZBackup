@@ -10,11 +10,14 @@ namespace zbackup
     class DataManager
     {
     public:
-        static DataManager *get_instance(Storage::ptr storage = nullptr);
+        static DataManager *get_instance();
 
         DataManager(const DataManager &) = delete;
 
         DataManager &operator=(const DataManager &) = delete;
+
+        // 初始化存储后端
+        void initialize_storage(Storage::ptr storage);
 
         bool insert(const BackupInfo &info) const;
 
@@ -35,7 +38,7 @@ namespace zbackup
         bool delete_by_real_path(const std::string &real_path) const;
 
     private:
-        explicit DataManager(Storage::ptr storage);
+        DataManager() = default;
 
         mutable std::shared_mutex rw_mutex_;
         Storage::ptr storage_;

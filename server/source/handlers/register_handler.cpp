@@ -5,8 +5,8 @@
 
 namespace zbackup
 {
-    RegisterHandler::RegisterHandler(Compress::ptr comp, UserManager::ptr user_manager)
-        : BaseHandler(std::move(comp)), user_manager_(std::move(user_manager))
+    RegisterHandler::RegisterHandler(UserManager::ptr user_manager)
+        : user_manager_(std::move(user_manager))
     {
     }
 

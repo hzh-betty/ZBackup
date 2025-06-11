@@ -4,7 +4,7 @@
 
 namespace zbackup
 {
-    StaticHandler::StaticHandler(Compress::ptr comp) : BaseHandler(std::move(comp))
+    StaticHandler::StaticHandler()
     {
         // 设置MIME类型映射
         mime_types_[".html"] = "text/html; charset=UTF-8";

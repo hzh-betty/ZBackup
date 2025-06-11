@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 3.15)
 project(ZBackup)
 set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -finput-charset=UTF-8 -fexec-charset=UTF-8")
 
 # 添加子目录，先编译ZHttpServer
 add_subdirectory(ZHttpServer)
@@ -13,12 +14,6 @@ find_package(nlohmann_json 3.2.0 REQUIRED)
 
 # 查找snappy库
 find_library(SNAPPY_LIB snappy REQUIRED)
-
-# 设置include目录
-include_directories(
-    ${CMAKE_SOURCE_DIR}/server/include
-    ${CMAKE_SOURCE_DIR}/ZHttpServer/include
-)
 
 # 递归收集server/source目录下的所有.cpp文件
 file(GLOB_RECURSE SERVER_SRC

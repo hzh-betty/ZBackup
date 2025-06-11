@@ -1,12 +1,11 @@
 #include <utility>
 
 #include "../../include/handlers/delete_handler.h"
+#include "../../include/storage/storage.h"
 
 namespace zbackup
 {
-    DeleteHandler::DeleteHandler(Compress::ptr comp) : BaseHandler(std::move(comp))
-    {
-    }
+    DeleteHandler::DeleteHandler() = default;
 
     void DeleteHandler::handle_request(const zhttp::HttpRequest &req, zhttp::HttpResponse *rsp)
     {

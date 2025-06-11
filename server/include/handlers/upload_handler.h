@@ -4,10 +4,10 @@
 
 namespace zbackup
 {
-    class UploadHandler final : public BaseHandler
+    class UploadHandler final : public DataHandler
     {
     public:
-        explicit UploadHandler(Compress::ptr comp);
+        UploadHandler();
 
         void handle_request(const zhttp::HttpRequest &req, zhttp::HttpResponse *rsp) override;
 

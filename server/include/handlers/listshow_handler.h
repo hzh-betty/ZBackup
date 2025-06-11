@@ -4,10 +4,10 @@
 
 namespace zbackup
 {
-    class ListShowHandler final : public BaseHandler
+    class ListShowHandler final : public DataHandler
     {
     public:
-        explicit ListShowHandler(Compress::ptr comp);
+        ListShowHandler();
         void handle_request(const zhttp::HttpRequest &req, zhttp::HttpResponse *rsp) override;
     };
 }
