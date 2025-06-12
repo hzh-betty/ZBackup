@@ -1,8 +1,8 @@
 #pragma once
-#include "../../ZHttpServer/include/middleware/middleware.h"
+#include "../../../ZHttpServer/include/middleware/middleware.h"
 #include "../log/logger.h"
 #include "../util/util.h"
-#include "../../ZHttpServer/include/session/session_manager.h"
+#include "../../../ZHttpServer/include/session/session_manager.h"
 
 namespace zbackup
 {
@@ -20,5 +20,6 @@ namespace zbackup
 
     private:
         bool is_authenticated(const zhttp::HttpRequest &req);
+        bool is_public_path(const std::string& path);
     };
 }

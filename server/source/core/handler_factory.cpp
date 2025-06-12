@@ -12,7 +12,7 @@
 
 namespace zbackup::core
 {
-    HandlerFactory::HandlerFactory(Compress::ptr compress)
+    HandlerFactory::HandlerFactory(interfaces::ICompress::ptr compress)
         : compress_(std::move(compress))
     {
         auto& container = ServiceContainer::get_instance();

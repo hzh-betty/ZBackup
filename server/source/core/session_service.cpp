@@ -17,9 +17,7 @@ namespace zbackup::core
     {
         auto session = session_manager_.get_session(req, rsp);
         std::string username = session->get_attribute("username");
-        session->remove_attribute("username");
-        session->remove_attribute("logged_in");
-        session_manager_.update_session(session);
+        session_manager_.destroy_session(session->get_session_id());
         ZBACKUP_LOG_DEBUG("Session destroyed for user: {}", username);
     }
 

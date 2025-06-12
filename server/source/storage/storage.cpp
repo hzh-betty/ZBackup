@@ -1,7 +1,7 @@
 #include "../../include/storage/storage.h"
 #include "../../include/core/service_container.h"
 #include "../../../ZHttpServer/include/db_pool/mysql_pool.h"
-#include "../../include/interfaces/core_interfaces.h"
+#include "../../include/interfaces/config_manager_interface.h"
 
 #include <memory>
 

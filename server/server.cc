@@ -5,6 +5,7 @@
 #include "include/core/session_service.h"
 #include "include/core/handler_factory.h"
 #include "include/user/user_manager.h"
+#include "include/compress/snappy_compress.h"
 #include <muduo/base/Logging.h>
 #include "include/log/logger.h"
 #include "../ZHttpServer/include/log/logger.h"
@@ -46,7 +47,7 @@ int main()
 
         // 创建核心组件
         auto& container = zbackup::core::ServiceContainer::get_instance();
-        zbackup::Compress::ptr compress(new zbackup::SnappyCompress());
+        zbackup::interfaces::ICompress::ptr compress(new zbackup::SnappyCompress());
         zbackup::Storage::ptr storage(new zbackup::DatabaseStorage());
         
         // 注册处理器工厂

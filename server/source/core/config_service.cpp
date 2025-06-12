@@ -4,7 +4,7 @@
 
 namespace zbackup::core
 {
-    ConfigService::ConfigService(const std::string& config_file) 
+    ConfigService::ConfigService(const std::string &config_file)
         : config_file_(config_file)
     {
         load_config();
@@ -15,18 +15,21 @@ namespace zbackup::core
     {
         FileUtil fu(config_file_);
         std::string body;
-        
-        if (!fu.exists()) {
+
+        if (!fu.exists())
+        {
             ZBACKUP_LOG_ERROR("Config file not found: {}", config_file_);
             return false;
         }
-        
-        if (!fu.get_content(&body)) {
+
+        if (!fu.get_content(&body))
+        {
             ZBACKUP_LOG_ERROR("Failed to read config file: {}", config_file_);
             return false;
         }
 
-        if (!JsonUtil::deserialize(&config_json_, body)) {
+        if (!JsonUtil::deserialize(&config_json_, body))
+        {
             ZBACKUP_LOG_ERROR("Failed to parse config file: {}", config_file_);
             return false;
         }
@@ -45,10 +48,12 @@ namespace zbackup::core
         FileUtil back_util(back_dir);
         FileUtil pack_util(pack_dir);
 
-        if (!back_util.create_directory()) {
+        if (!back_util.create_directory())
+        {
             ZBACKUP_LOG_ERROR("Failed to create backup directory: {}", back_dir);
         }
-        if (!pack_util.create_directory()) {
+        if (!pack_util.create_directory())
+        {
             ZBACKUP_LOG_ERROR("Failed to create pack directory: {}", pack_dir);
         }
     }
@@ -56,28 +61,28 @@ namespace zbackup::core
     void ConfigService::log_config_summary()
     {
         ZBACKUP_LOG_INFO("Server config - {}:{}", get_ip(), get_port());
-        ZBACKUP_LOG_INFO("Directories - backup: {}, pack: {}", 
+        ZBACKUP_LOG_INFO("Directories - backup: {}, pack: {}",
                          get_string("back_dir", "./backup/"),
                          get_string("pack_dir", "./pack/"));
         ZBACKUP_LOG_INFO("SSL enabled: {}", get_bool("use_ssl", false));
-        ZBACKUP_LOG_INFO("MySQL - {}:{}@{}/{}", 
+        ZBACKUP_LOG_INFO("MySQL - {}:{}@{}/{}",
                          get_string("mysql_user", "root"),
                          get_int("mysql_port", 3306),
                          get_string("mysql_host", "localhost"),
                          get_string("mysql_db", "zbackup"));
     }
 
-    std::string ConfigService::get_string(const std::string& key, const std::string& default_value)
+    std::string ConfigService::get_string(const std::string &key, const std::string &default_value)
     {
         return config_json_.value(key, default_value);
     }
 
-    int ConfigService::get_int(const std::string& key, int default_value)
+    int ConfigService::get_int(const std::string &key, int default_value)
     {
         return config_json_.value(key, default_value);
     }
 
-    bool ConfigService::get_bool(const std::string& key, bool default_value)
+    bool ConfigService::get_bool(const std::string &key, bool default_value)
     {
         return config_json_.value(key, default_value);
     }

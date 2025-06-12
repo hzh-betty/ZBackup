@@ -1,5 +1,5 @@
 #pragma once
-#include "../interfaces/core_interfaces.h"
+#include "../interfaces/session_manager_interface.h"
 #include "../log/logger.h"
 #include "../../../ZHttpServer/include/session/session_manager.h"
 

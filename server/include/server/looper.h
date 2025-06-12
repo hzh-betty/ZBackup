@@ -1,9 +1,9 @@
 #pragma once
-#include "../compress/compress.h"
-#include "../data/data_manage.h"
-#include "../core/threadpool.h"
-#include <atomic>
+#include "../interfaces/compress_interface.h"
+#include "../log/logger.h"
 #include <memory>
+#include <atomic>
+#include <thread>
 
 namespace zbackup
 {
@@ -12,21 +12,18 @@ namespace zbackup
     public:
         using ptr = std::shared_ptr<BackupLooper>;
 
-        explicit BackupLooper(Compress::ptr comp);
-
+        explicit BackupLooper(interfaces::ICompress::ptr comp);
         ~BackupLooper();
 
         void start() const;
 
     private:
         void hot_monitor() const;
-
         void deal_task(const std::string &str) const;
-
         static bool hot_judge(const std::string &filename, int hot_time);
-
+    
     private:
         std::atomic<bool> stop_;
-        Compress::ptr comp_;
+        interfaces::ICompress::ptr comp_;
     };
 }

@@ -1,6 +1,7 @@
 #pragma once
-#include "../interfaces/core_interfaces.h"
-#include "../compress/compress.h"
+#include "../interfaces/handler_factory_interface.h"
+#include "../interfaces/auth_manager_interface.h"
+#include "../interfaces/compress_interface.h"
 #include "../user/user_manager.h"
 
 namespace zbackup::core
@@ -8,10 +9,10 @@ namespace zbackup::core
     class HandlerFactory : public interfaces::IHandlerFactory
     {
     public:
-        using HandlerPtr = std::shared_ptr<zhttp::zrouter::RouterHandler>;
+        using HandlerPtr = zhttp::zrouter::RouterHandler::ptr;
 
     public:
-        explicit HandlerFactory(Compress::ptr compress);
+        explicit HandlerFactory(interfaces::ICompress::ptr compress);
         ~HandlerFactory() override = default;
 
         HandlerPtr create_upload_handler() override;
@@ -24,7 +25,7 @@ namespace zbackup::core
         HandlerPtr create_logout_handler() override;
 
     private:
-        Compress::ptr compress_;
+        interfaces::ICompress::ptr compress_;
         interfaces::IAuthenticationService::ptr auth_service_;
         std::shared_ptr<UserManager> user_manager_;
     };

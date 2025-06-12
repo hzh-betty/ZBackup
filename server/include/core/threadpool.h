@@ -10,7 +10,7 @@
 #include <chrono>
 #include "../log/logger.h"
 
-namespace zbackup
+namespace zbackup::core
 {
     // 线程池配置常量
     static const size_t DEFAULT_THREAD_NUM = std::thread::hardware_concurrency(); // 默认线程数量（CPU核心数）

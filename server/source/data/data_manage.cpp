@@ -10,16 +10,15 @@ namespace zbackup
     DataManager *DataManager::get_instance()
     {
         std::call_once(init_flag_, []()
-        {
-            instance_.reset(new DataManager());
-        });
+                       { instance_.reset(new DataManager()); });
         return instance_.get();
     }
 
     void DataManager::initialize_storage(Storage::ptr storage)
     {
         std::unique_lock<std::shared_mutex> lock(rw_mutex_);
-        if (storage_) {
+        if (storage_)
+        {
             ZBACKUP_LOG_WARN("DataManager storage already initialized, replacing with new instance");
         }
         storage_ = std::move(storage);
@@ -29,7 +28,8 @@ namespace zbackup
     bool DataManager::insert(const BackupInfo &info) const
     {
         std::unique_lock<std::shared_mutex> lock(rw_mutex_);
-        if (!storage_) {
+        if (!storage_)
+        {
             ZBACKUP_LOG_ERROR("DataManager storage not initialized");
             return false;
         }
@@ -39,7 +39,8 @@ namespace zbackup
     bool DataManager::update(const BackupInfo &info) const
     {
         std::unique_lock<std::shared_mutex> lock(rw_mutex_);
-        if (!storage_) {
+        if (!storage_)
+        {
             ZBACKUP_LOG_ERROR("DataManager storage not initialized");
             return false;
         }
@@ -49,7 +50,8 @@ namespace zbackup
     bool DataManager::get_one_by_url(const std::string &url, BackupInfo *info) const
     {
         std::shared_lock<std::shared_mutex> lock(rw_mutex_);
-        if (!storage_) {
+        if (!storage_)
+        {
             ZBACKUP_LOG_ERROR("DataManager storage not initialized");
             return false;
         }
@@ -59,7 +61,8 @@ namespace zbackup
     bool DataManager::get_one_by_real_path(const std::string &real_path, BackupInfo *info) const
     {
         std::shared_lock<std::shared_mutex> lock(rw_mutex_);
-        if (!storage_) {
+        if (!storage_)
+        {
             ZBACKUP_LOG_ERROR("DataManager storage not initialized");
             return false;
         }
@@ -69,7 +72,8 @@ namespace zbackup
     void DataManager::get_all(std::vector<BackupInfo> *arry) const
     {
         std::shared_lock<std::shared_mutex> lock(rw_mutex_);
-        if (!storage_) {
+        if (!storage_)
+        {
             ZBACKUP_LOG_ERROR("DataManager storage not initialized");
             return;
         }
@@ -79,7 +83,8 @@ namespace zbackup
     bool DataManager::persistence() const
     {
         std::shared_lock<std::shared_mutex> lock(rw_mutex_);
-        if (!storage_) {
+        if (!storage_)
+        {
             ZBACKUP_LOG_ERROR("DataManager storage not initialized");
             return false;
         }
@@ -89,7 +94,8 @@ namespace zbackup
     bool DataManager::delete_one(const BackupInfo &info) const
     {
         std::unique_lock<std::shared_mutex> lock(rw_mutex_);
-        if (!storage_) {
+        if (!storage_)
+        {
             ZBACKUP_LOG_ERROR("DataManager storage not initialized");
             return false;
         }
@@ -108,7 +114,8 @@ namespace zbackup
     bool DataManager::delete_by_url(const std::string &url) const
     {
         std::unique_lock<std::shared_mutex> lock(rw_mutex_);
-        if (!storage_) {
+        if (!storage_)
+        {
             ZBACKUP_LOG_ERROR("DataManager storage not initialized");
             return false;
         }
@@ -127,7 +134,8 @@ namespace zbackup
     bool DataManager::delete_by_real_path(const std::string &real_path) const
     {
         std::unique_lock<std::shared_mutex> lock(rw_mutex_);
-        if (!storage_) {
+        if (!storage_)
+        {
             ZBACKUP_LOG_ERROR("DataManager storage not initialized");
             return false;
         }

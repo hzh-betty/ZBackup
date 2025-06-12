@@ -1,22 +1,15 @@
 #pragma once
-#include "../interfaces/core_interfaces.h"
+#include "../interfaces/route_registry_interface.h"
+#include "../interfaces/handler_factory_interface.h"
+#include "../interfaces/config_manager_interface.h"
 #include "../../../ZHttpServer/include/http/http_server.h"
 #include <memory>
 
 namespace zbackup::core
 {
-    // 路由注册策略接口
-    class IRouteRegistry
-    {
-    public:
-        using ptr = std::shared_ptr<IRouteRegistry>;
-        virtual ~IRouteRegistry() = default;
-
-        virtual void register_routes(zhttp::HttpServer* server) = 0;
-    };
 
     // 默认路由注册实现
-    class DefaultRouteRegistry : public IRouteRegistry
+    class DefaultRouteRegistry : public interfaces::IRouteRegistry
     {
     public:
         explicit DefaultRouteRegistry(interfaces::IHandlerFactory::ptr handler_factory,

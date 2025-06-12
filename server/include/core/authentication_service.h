@@ -1,5 +1,6 @@
 #pragma once
-#include "../interfaces/core_interfaces.h"
+#include "../interfaces/auth_manager_interface.h"
+#include "../interfaces/session_manager_interface.h"
 #include "../log/logger.h"
 #include <memory>
 

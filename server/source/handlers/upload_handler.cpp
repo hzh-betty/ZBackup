@@ -1,5 +1,5 @@
 #include <utility>
-#include "../../include/interfaces/core_interfaces.h"
+#include "../../include/interfaces/config_manager_interface.h"
 #include "../../include/handlers/upload_handler.h"
 #include "../../include/core/service_container.h"
 #include "../../include/log/logger.h"

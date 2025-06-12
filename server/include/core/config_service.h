@@ -1,5 +1,5 @@
 #pragma once
-#include "../interfaces/core_interfaces.h"
+#include "../interfaces/config_manager_interface.h"
 #include "../log/logger.h"
 #include <nlohmann/json.hpp>
 

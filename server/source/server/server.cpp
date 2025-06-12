@@ -4,10 +4,12 @@
 #include "../../include/middleware/auth_middleware.h"
 #include "../../../ZHttpServer/include/session/session_manager.h"
 #include "../../../ZHttpServer/include/db_pool/redis_pool.h"
+#include "../../include/data/data_manage.h"
+#include "../../include/core/threadpool.h"
 
 namespace zbackup
 {
-    BackupServer::BackupServer(const Compress::ptr &comp, const Storage::ptr &storage)
+    BackupServer::BackupServer(const interfaces::ICompress::ptr &comp, const Storage::ptr &storage)
         : looper_(std::make_shared<BackupLooper>(comp)), running_(false)
     {
         auto& container = core::ServiceContainer::get_instance();
@@ -57,7 +59,7 @@ namespace zbackup
     void BackupServer::stop()
     {
         running_ = false;
-        // TODO: 实现优雅停机逻辑
+        
         ZBACKUP_LOG_INFO("BackupServer stop requested");
     }
 
@@ -76,7 +78,7 @@ namespace zbackup
         running_ = true;
         ZBACKUP_LOG_INFO("BackupServer starting on port {}", config_manager_->get_port());
         
-        ThreadPool::get_instance()->start();
+        core::ThreadPool::get_instance()->start();
         looper_->start();
         server_->start();
     }

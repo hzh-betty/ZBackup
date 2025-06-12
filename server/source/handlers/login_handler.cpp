@@ -1,6 +1,6 @@
 #include "../../include/handlers/login_handler.h"
 #include "../../include/core/service_container.h"
-#include "../../include/interfaces/core_interfaces.h"
+#include "../../include/interfaces/auth_manager_interface.h"
 #include <nlohmann/json.hpp>
 #include <utility>
 

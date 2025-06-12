@@ -4,7 +4,7 @@
 #include "../../include/handlers/base_handler.h"
 #include "../../include/storage/storage.h"
 #include "../../include/data/data_manage.h"
-#include "../../include/compress/compress.h"
+#include "../../include/compress/snappy_compress.h"
 
 namespace zbackup
 {
@@ -35,7 +35,7 @@ namespace zbackup
         data_manager_ = DataManager::get_instance();
     }
 
-    CompressHandler::CompressHandler(std::shared_ptr<Compress> comp) 
+    CompressHandler::CompressHandler(interfaces::ICompress::ptr comp) 
         : comp_(std::move(comp))
     {
     }

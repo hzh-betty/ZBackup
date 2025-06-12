@@ -1,5 +1,6 @@
 #pragma once
 #include "../../../ZHttpServer/include/router/router_handler.h"
+#include "../interfaces/compress_interface.h"
 #include "../util/util.h"
 #include "../log/logger.h"
 #include "../../include/data/data_manage.h"
@@ -8,7 +9,7 @@ namespace zbackup
 {
     struct BackupInfo;
     class DataManager;
-    class Compress;
+    class ICompress;
 
     // 基础处理器接口
     class IHandler : public zhttp::zrouter::RouterHandler
@@ -35,14 +36,14 @@ namespace zbackup
     {
     protected:
         DataHandler();
-        DataManager* data_manager_ = DataManager::get_instance();
+        DataManager *data_manager_ = DataManager::get_instance();
     };
 
     // 需要压缩功能的处理器基类
     class CompressHandler : public DataHandler
     {
-    protected:        
-        explicit CompressHandler(std::shared_ptr<Compress> comp);
-        std::shared_ptr<Compress> comp_;
+    protected:
+        explicit CompressHandler(interfaces::ICompress::ptr comp);
+        interfaces::ICompress::ptr comp_;
     };
 }

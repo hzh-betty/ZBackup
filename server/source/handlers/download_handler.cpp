@@ -2,12 +2,13 @@
 
 #include "../../include/handlers/download_handler.h"
 #include "../../include/storage/storage.h"
-#include "../../include/compress/compress.h"
+#include "../../include/compress/snappy_compress.h"
+
 
 namespace zbackup
 {
     // 下载处理器构造函数
-    DownloadHandler::DownloadHandler(std::shared_ptr<Compress> comp) : CompressHandler(std::move(comp))
+    DownloadHandler::DownloadHandler(interfaces::ICompress::ptr comp) : CompressHandler(std::move(comp))
     {
     }
 

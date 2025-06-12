@@ -2,22 +2,22 @@
 #include "../../include/server/looper.h"
 #include "../../include/core/service_container.h"
 #include "../../include/core/threadpool.h"
-#include "../../include/compress/compress.h"
-#include "../../include/interfaces/core_interfaces.h"
-
+#include "../../include/interfaces/config_manager_interface.h"
+#include "../../include/util/util.h"
+#include "../../include/data/data_manage.h"
 
 namespace zbackup
 {
     // 后台循环构造函数，启动热点文件监控
-    BackupLooper::BackupLooper(Compress::ptr comp)
-        : stop_(false), comp_(std::move(std::move(comp)))
+    BackupLooper::BackupLooper(interfaces::ICompress::ptr comp)
+        : stop_(false), comp_(std::move(comp))
     {
         ZBACKUP_LOG_INFO("BackupLooper initialized");
     }
 
     void BackupLooper::start() const
     {
-        zbackup::ThreadPool::get_instance()->submit_task([this]()
+        core::ThreadPool::get_instance()->submit_task([this]()
         {
             hot_monitor();
         });
@@ -58,7 +58,7 @@ namespace zbackup
                     continue;
 
                 hot_file_count++;
-                ThreadPool::get_instance()->submit_task([this, str]()
+                core::ThreadPool::get_instance()->submit_task([this, str]()
                 {
                     this->deal_task(str);
                 });
