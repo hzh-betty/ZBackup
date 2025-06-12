@@ -1,4 +1,5 @@
 #include "../../include/handlers/register_handler.h"
+#include "../../include/util/util.h"
 #include "../../include/config/config.h"
 #include <nlohmann/json.hpp>
 #include <utility>

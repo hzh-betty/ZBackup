@@ -1,5 +1,6 @@
 #include "../../include/handlers/logout_handler.h"
-#include "../../../ZHttpServer/include/session/session_manager.h"
+#include "../../include/core/service_container.h"
+#include "../../include/interfaces/core_interfaces.h"
 #include <nlohmann/json.hpp>
 #include <utility>
 
@@ -9,25 +10,55 @@ namespace zbackup
 
     void LogoutHandler::handle_request(const zhttp::HttpRequest &req, zhttp::HttpResponse *rsp)
     {
-        auto session = zhttp::zsession::SessionManager::get_instance().get_session(req, rsp);
+        auto &container = core::ServiceContainer::get_instance();
+        auto auth_service = container.resolve<interfaces::IAuthenticationService>();
 
-        std::string username = session->get_attribute("username");
+        if (!auth_service)
+        {
+            ZBACKUP_LOG_ERROR("AuthenticationService not available");
+            rsp->set_status_code(zhttp::HttpResponse::StatusCode::InternalServerError);
+            rsp->set_status_message("Internal Server Error");
+            rsp->set_content_type("application/json");
+            rsp->set_body(R"({"error": "Authentication service unavailable"})");
+            return;
+        }
 
-        // 销毁会话
-        zhttp::zsession::SessionManager::get_instance().destroy_session(session->get_session_id());
+        // 获取用户名用于日志记录
+        auto session_service = container.resolve<interfaces::ISessionManager>();
+        std::string username = session_service ? session_service->get_username(req) : "unknown";
 
-        nlohmann::json resp_json;
-        resp_json["success"] = true;
-        resp_json["message"] = "Logout successful";
+        // 使用AuthenticationService进行退出登录
+        if (auth_service->logout(req, rsp))
+        {
+            nlohmann::json resp_json;
+            resp_json["success"] = true;
+            resp_json["message"] = "Logout successful";
 
-        std::string response_body;
-        JsonUtil::serialize(resp_json, &response_body);
+            std::string response_body;
+            JsonUtil::serialize(resp_json, &response_body);
 
-        rsp->set_status_code(zhttp::HttpResponse::StatusCode::OK);
-        rsp->set_status_message("OK");
-        rsp->set_content_type("application/json");
-        rsp->set_body(response_body);
+            rsp->set_status_code(zhttp::HttpResponse::StatusCode::OK);
+            rsp->set_status_message("OK");
+            rsp->set_content_type("application/json");
+            rsp->set_body(response_body);
 
-        ZBACKUP_LOG_INFO("User '{}' logged out", username);
+            ZBACKUP_LOG_INFO("User '{}' logged out", username.empty() ? "unknown" : username);
+        }
+        else
+        {
+            nlohmann::json resp_json;
+            resp_json["success"] = false;
+            resp_json["error"] = "Logout failed";
+
+            std::string response_body;
+            JsonUtil::serialize(resp_json, &response_body);
+
+            rsp->set_status_code(zhttp::HttpResponse::StatusCode::InternalServerError);
+            rsp->set_status_message("Internal Server Error");
+            rsp->set_content_type("application/json");
+            rsp->set_body(response_body);
+
+            ZBACKUP_LOG_ERROR("Logout failed for user '{}'", username);
+        }
     }
 }

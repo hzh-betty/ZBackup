@@ -16,14 +16,14 @@ namespace zbackup::core
         AuthenticationService();
         ~AuthenticationService() override = default;
 
-        bool authenticate(const zhttp::HttpRequest& req) override;
-        bool login(const std::string& username, const std::string& password,
-                  const zhttp::HttpRequest& req, zhttp::HttpResponse* rsp) override;
-        bool logout(const zhttp::HttpRequest& req, zhttp::HttpResponse* rsp) override;
+        bool authenticate(const zhttp::HttpRequest &req) override;
+        bool login(const std::string &username, const std::string &password,
+                   const zhttp::HttpRequest &req, zhttp::HttpResponse *rsp) override;
+        bool logout(const zhttp::HttpRequest &req, zhttp::HttpResponse *rsp) override;
 
     private:
-       bool ensure_dependencies();  // 延迟初始化依赖
-       private:
+        bool ensure_dependencies(); // 延迟初始化依赖
+    private:
         std::shared_ptr<UserManager> user_manager_;
         interfaces::ISessionManager::ptr session_manager_;
     };

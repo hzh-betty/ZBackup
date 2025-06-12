@@ -1,6 +1,7 @@
 #pragma once
 #include "../interfaces/core_interfaces.h"
 #include "../log/logger.h"
+#include "../../../ZHttpServer/include/session/session_manager.h"
 
 namespace zbackup::core
 {
@@ -15,5 +16,7 @@ namespace zbackup::core
         void destroy_session(const zhttp::HttpRequest& req, zhttp::HttpResponse* rsp) override;
         std::string get_username(const zhttp::HttpRequest& req) override;
         bool is_valid_session(const zhttp::HttpRequest& req) override;
+    protected:
+        zhttp::zsession::SessionManager& session_manager_ = zhttp::zsession::SessionManager::get_instance();
     };
 }

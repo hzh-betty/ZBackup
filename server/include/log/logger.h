@@ -13,7 +13,7 @@ namespace zbackup
             std::unique_ptr<zlog::GlobalLoggerBuilder> builder(new zlog::GlobalLoggerBuilder());
             builder->buildLoggerName("backup_logger");
             builder->buildLoggerLevel(limitLevel);
-            builder->buildLoggerFormmater("[%c][%d][%f:%l[%p]  %m%n");
+            builder->buildLoggerFormmater("[%c][%d][%f:%l][%p]  %m%n");
             builder->buildLoggerSink<zlog::StdOutSink>();
             backup_logger = builder->build();
         }

@@ -1,38 +1,55 @@
 #include "../../include/middleware/auth_middleware.h"
-#include <nlohmann/json.hpp>
+#include "../../include/core/service_container.h"
+#include "../../include/interfaces/core_interfaces.h"
 
 namespace zbackup
 {
-    AuthMiddleware::AuthMiddleware() = default;
-
-    void AuthMiddleware::before(zhttp::HttpRequest &req)
+    AuthMiddleware::AuthMiddleware()
     {
-        // 允许所有请求通过，不进行认证检查
-        ZBACKUP_LOG_DEBUG("AuthMiddleware: allowing access to {}", req.get_path());
+        ZBACKUP_LOG_DEBUG("AuthMiddleware initialized");
     }
 
-    void AuthMiddleware::after(zhttp::HttpResponse &rsp)
+    void AuthMiddleware::before(zhttp::HttpRequest &request)
     {
-        // 响应后处理 - 目前不需要特殊处理
-        // 可以在这里添加响应头或日志记录
+        std::string path = request.get_path();
+        ZBACKUP_LOG_DEBUG("AuthMiddleware checking path: {}", path);
+
+        // 公共路径，无需认证
+        if (path == "/" || path == "/home.html" || path == "/home" ||
+            path == "/login.html" || path == "/register.html" ||
+            path == "/login" || path == "/register" ||
+            path == "/api/status" || path.find("/static/") == 0)
+        {
+            ZBACKUP_LOG_DEBUG("Public path allowed: {}", path);
+            return;
+        }
+
+        // 检查认证状态
+        if (!is_authenticated(request))
+        {
+            ZBACKUP_LOG_WARN("Unauthorized access attempt to: {}", path);
+            // 可以在这里设置重定向或其他处理
+        }
+    }
+
+    void AuthMiddleware::after(zhttp::HttpResponse &response)
+    {
+        // 响应后处理，可以添加安全头等
+        response.set_header("X-Frame-Options", "DENY");
+        response.set_header("X-Content-Type-Options", "nosniff");
+        response.set_header("X-XSS-Protection", "1; mode=block");
     }
 
     bool AuthMiddleware::is_authenticated(const zhttp::HttpRequest &req)
     {
-        try
-        {
-            zhttp::HttpResponse dummy_response;
-            auto session = zhttp::zsession::SessionManager::get_instance().get_session(req, &dummy_response);
-
-            auto logged_in = session->get_attribute("logged_in");
-            auto username = session->get_attribute("username");
-
-            return logged_in == "true" && !username.empty();
-        }
-        catch (const std::exception &e)
-        {
-            ZBACKUP_LOG_ERROR("Error checking authentication: {}", e.what());
+        auto& container = core::ServiceContainer::get_instance();
+        auto auth_service = container.resolve<interfaces::IAuthenticationService>();
+        
+        if (!auth_service) {
+            ZBACKUP_LOG_ERROR("AuthenticationService not available in middleware");
             return false;
         }
+
+        return auth_service->authenticate(req);
     }
 }

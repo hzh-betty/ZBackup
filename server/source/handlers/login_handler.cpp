@@ -1,6 +1,6 @@
 #include "../../include/handlers/login_handler.h"
-#include "../../include/config/config.h"
-#include "../../../ZHttpServer/include/session/session_manager.h"
+#include "../../include/core/service_container.h"
+#include "../../include/interfaces/core_interfaces.h"
 #include <nlohmann/json.hpp>
 #include <utility>
 
@@ -51,15 +51,21 @@ namespace zbackup
         std::string username = req_json["username"];
         std::string password = req_json["password"];
 
-        if (user_manager_->validate_user(username, password))
+        // 使用AuthenticationService进行登录
+        auto& container = core::ServiceContainer::get_instance();
+        auto auth_service = container.resolve<interfaces::IAuthenticationService>();
+        
+        if (!auth_service) {
+            ZBACKUP_LOG_ERROR("AuthenticationService not available");
+            rsp->set_status_code(zhttp::HttpResponse::StatusCode::InternalServerError);
+            rsp->set_status_message("Internal Server Error");
+            rsp->set_content_type("application/json");
+            rsp->set_body(R"({"error": "Authentication service unavailable"})");
+            return;
+        }
+
+        if (auth_service->login(username, password, req, rsp))
         {
-            // 创建会话
-            auto session = zhttp::zsession::SessionManager::get_instance().get_session(req, rsp);
-            session->set_attribute("username", username);
-            session->set_attribute("logged_in", "true");
-
-            zhttp::zsession::SessionManager::get_instance().update_session(session);
-
             nlohmann::json resp_json;
             resp_json["success"] = true;
             resp_json["message"] = "Login successful";
