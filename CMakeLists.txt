@@ -15,13 +15,13 @@ find_package(nlohmann_json 3.2.0 REQUIRED)
 # 查找snappy库
 find_library(SNAPPY_LIB snappy REQUIRED)
 
-# 递归收集server/source目录下的所有.cpp文件
+# 递归收集backup/source目录下的所有.cpp文件
 file(GLOB_RECURSE SERVER_SRC
-    ${CMAKE_SOURCE_DIR}/server/source/*.cpp
+    ${CMAKE_SOURCE_DIR}/backup/source/*.cpp
 )
 
 # 添加主程序文件
-set(MAIN_SRC ${CMAKE_SOURCE_DIR}/server/server.cc)
+set(MAIN_SRC ${CMAKE_SOURCE_DIR}/backup/main.cc)
 
 
 # backup_server可执行文件
