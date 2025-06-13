@@ -5,7 +5,7 @@
 
 namespace zbackup
 {
-    RegisterHandler::RegisterHandler(UserManager::ptr user_manager)
+    RegisterHandler::RegisterHandler(interfaces::IUserManager::ptr user_manager)
         : user_manager_(std::move(user_manager))
     {
     }

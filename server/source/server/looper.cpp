@@ -37,6 +37,11 @@ namespace zbackup
         auto& container = core::ServiceContainer::get_instance();
         auto config = container.resolve<interfaces::IConfigManager>();
         
+        if (!config) {
+            ZBACKUP_LOG_FATAL("ConfigManager not available for BackupLooper");
+            return;
+        }
+        
         std::string back_dir = config->get_string("back_dir", "./backup/");
         int hot_time = config->get_int("hot_time", 300);
 
@@ -76,10 +81,16 @@ namespace zbackup
     // 处理热点文件的压缩任务
     void BackupLooper::deal_task(const std::string &str) const
     {
-        DataManager *data_manager = DataManager::get_instance();
+        auto& container = core::ServiceContainer::get_instance();
+        auto data_manager = container.resolve<interfaces::IDataManager>();
+        
+        if (!data_manager) {
+            ZBACKUP_LOG_ERROR("DataManager not available for task processing");
+            return;
+        }
 
         // 3. 获取文件信息
-        BackupInfo bi;
+        info::BackupInfo bi;
         if (data_manager->get_one_by_real_path(str, &bi) == false)
         {
             ZBACKUP_LOG_WARN("File [{}] exists but no backup info found, creating new entry", str);
@@ -108,11 +119,6 @@ namespace zbackup
         if (data_manager->update(bi) == false)
         {
             ZBACKUP_LOG_ERROR("Failed to update backup info for: {}", str);
-            return;
-        }
-        if (data_manager->persistence() == false)
-        {
-            ZBACKUP_LOG_ERROR("Failed to persist backup info for: {}", str);
             return;
         }
 

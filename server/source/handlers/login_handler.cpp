@@ -1,12 +1,13 @@
 #include "../../include/handlers/login_handler.h"
 #include "../../include/core/service_container.h"
 #include "../../include/interfaces/auth_manager_interface.h"
+#include "../../include/interfaces/user_manager_interface.h"
+#include "../../include/util/util.h"
 #include <nlohmann/json.hpp>
-#include <utility>
 
 namespace zbackup
 {
-    LoginHandler::LoginHandler(UserManager::ptr user_manager)
+    LoginHandler::LoginHandler(interfaces::IUserManager::ptr user_manager)
         : user_manager_(std::move(user_manager))
     {
     }

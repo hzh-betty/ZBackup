@@ -1,18 +1,23 @@
 #include <utility>
 
 #include "../../include/handlers/listshow_handler.h"
-#include "../../include/storage/storage.h"
+#include "../../include/util/util.h"
+#include <nlohmann/json.hpp>
 
 namespace zbackup
 {
     // 列表展示处理器构造函数
-    ListShowHandler::ListShowHandler() = default;
+    ListShowHandler::ListShowHandler(interfaces::IDataManager::ptr data_manager)
+        : DataHandler(std::move(data_manager))
+    {
+        ZBACKUP_LOG_DEBUG("ListShowHandler initialized");
+    }
 
     // 处理文件列表展示请求，生成HTML页面
     void ListShowHandler::handle_request(const zhttp::HttpRequest &req, zhttp::HttpResponse *rsp)
     {
         // 获取所有备份文件信息
-        std::vector<BackupInfo> arry;
+        std::vector<info::BackupInfo> arry;
         data_manager_->get_all(&arry);
         ZBACKUP_LOG_DEBUG("Retrieved {} backup entries for list display", arry.size());
 
@@ -36,5 +41,7 @@ namespace zbackup
         rsp->set_status_message("OK");
         rsp->set_content_type("text/html; charset=UTF-8");
         rsp->set_body(ss.str());
+
+        ZBACKUP_LOG_INFO("ListShowHandler processed request, generated HTML with {} entries", arry.size());
     }
 }

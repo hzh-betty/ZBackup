@@ -1,13 +1,9 @@
 #pragma once
 #include "../interfaces/auth_manager_interface.h"
 #include "../interfaces/session_manager_interface.h"
+#include "../interfaces/user_manager_interface.h"
 #include "../log/logger.h"
 #include <memory>
-
-namespace zbackup
-{
-    class UserManager;
-}
 
 namespace zbackup::core
 {
@@ -25,7 +21,7 @@ namespace zbackup::core
     private:
         bool ensure_dependencies(); // 延迟初始化依赖
     private:
-        std::shared_ptr<UserManager> user_manager_;
+        interfaces::IUserManager::ptr user_manager_;
         interfaces::ISessionManager::ptr session_manager_;
     };
 }

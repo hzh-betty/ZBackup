@@ -2,6 +2,7 @@
 #include "../../include/core/service_container.h"
 #include "../../include/interfaces/auth_manager_interface.h"
 #include "../../include/interfaces/session_manager_interface.h"
+#include "../../include/util/util.h"
 #include <nlohmann/json.hpp>
 #include <utility>
 

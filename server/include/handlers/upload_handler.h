@@ -7,7 +7,7 @@ namespace zbackup
     class UploadHandler final : public DataHandler
     {
     public:
-        UploadHandler();
+        explicit UploadHandler(interfaces::IDataManager::ptr data_manager);
 
         void handle_request(const zhttp::HttpRequest &req, zhttp::HttpResponse *rsp) override;
 

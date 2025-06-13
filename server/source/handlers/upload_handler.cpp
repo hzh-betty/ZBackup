@@ -1,12 +1,18 @@
 #include <utility>
 #include "../../include/interfaces/config_manager_interface.h"
+#include "../../include/interfaces/storage_interface.h"
 #include "../../include/handlers/upload_handler.h"
 #include "../../include/core/service_container.h"
-#include "../../include/log/logger.h"
+#include "../../include/util/util.h"
+#include <nlohmann/json.hpp>
 
 namespace zbackup
 {
-    UploadHandler::UploadHandler() = default;
+    UploadHandler::UploadHandler(interfaces::IDataManager::ptr data_manager)
+        : DataHandler(std::move(data_manager))
+    {
+        ZBACKUP_LOG_DEBUG("UploadHandler initialized");
+    }
 
     void UploadHandler::handle_request(const zhttp::HttpRequest &req, zhttp::HttpResponse *rsp)
     {
@@ -117,6 +123,11 @@ namespace zbackup
         auto& container = core::ServiceContainer::get_instance();
         auto config = container.resolve<interfaces::IConfigManager>();
         
+        if (!config) {
+            ZBACKUP_LOG_ERROR("ConfigManager not available for file save");
+            return false;
+        }
+        
         std::string back_dir = config->get_string("back_dir", "./backup/");
         std::string real_path = back_dir + FileUtil(filename).get_name();
         FileUtil fu(real_path);
@@ -127,7 +138,7 @@ namespace zbackup
             return false;
         }
 
-        BackupInfo info;
+        info::BackupInfo info;
         if (info.new_backup_info(real_path) == false)
         {
             ZBACKUP_LOG_ERROR("Failed to create backup info for: {}", real_path);
@@ -137,12 +148,6 @@ namespace zbackup
         if (data_manager_->insert(info) == false)
         {
             ZBACKUP_LOG_ERROR("Failed to insert backup info for: {}", real_path);
-            return false;
-        }
-
-        if (data_manager_->persistence() == false)
-        {
-            ZBACKUP_LOG_ERROR("Failed to persist backup info for: {}", real_path);
             return false;
         }
 

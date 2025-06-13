@@ -56,4 +56,7 @@ namespace zbackup
     void InitMysqlPool();
     // 初始化Redis连接池
     void InitRedisPool();
+    
+    // 时间转换函数
+    std::string time_to_str(time_t timestamp);
 }

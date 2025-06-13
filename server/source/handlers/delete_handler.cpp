@@ -1,27 +1,23 @@
 #include <utility>
 
 #include "../../include/handlers/delete_handler.h"
-#include "../../include/storage/storage.h"
+#include "../../include/util/util.h"
+#include <nlohmann/json.hpp>
 
 namespace zbackup
 {
-    DeleteHandler::DeleteHandler() = default;
+    DeleteHandler::DeleteHandler(interfaces::IDataManager::ptr data_manager)
+        : DataHandler(std::move(data_manager))
+    {
+        ZBACKUP_LOG_DEBUG("DeleteHandler initialized");
+    }
 
     void DeleteHandler::handle_request(const zhttp::HttpRequest &req, zhttp::HttpResponse *rsp)
     {
-        std::string file_url = req.get_query_parameters("url");
-        if (file_url.empty())
-        {
-            ZBACKUP_LOG_WARN("Delete request missing url parameter");
-            rsp->set_status_code(zhttp::HttpResponse::StatusCode::BadRequest);
-            rsp->set_status_message("Bad Request");
-            rsp->set_body("Missing url parameter");
-            return;
-        }
-
+        std::string file_url = req.get_path();
         ZBACKUP_LOG_INFO("Delete request: {}", file_url);
 
-        BackupInfo info;
+        info::BackupInfo info;
         if (!data_manager_->get_one_by_url(file_url, &info))
         {
             ZBACKUP_LOG_WARN("File not found for deletion: {}", file_url);
@@ -71,3 +67,4 @@ namespace zbackup
         rsp->set_body(R"({"success": true, "message": "File deleted successfully"})");
     }
 }
+

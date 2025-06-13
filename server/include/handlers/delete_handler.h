@@ -6,7 +6,7 @@ namespace zbackup
     class DeleteHandler final : public DataHandler
     {
     public:
-        DeleteHandler();
+        explicit DeleteHandler(interfaces::IDataManager::ptr data_manager);
 
         void handle_request(const zhttp::HttpRequest &req, zhttp::HttpResponse *rsp) override;
     };

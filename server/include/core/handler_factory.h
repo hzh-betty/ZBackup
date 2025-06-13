@@ -2,7 +2,8 @@
 #include "../interfaces/handler_factory_interface.h"
 #include "../interfaces/auth_manager_interface.h"
 #include "../interfaces/compress_interface.h"
-#include "../user/user_manager.h"
+#include "../interfaces/data_manager_interface.h"
+#include "../interfaces/user_manager_interface.h"
 
 namespace zbackup::core
 {
@@ -26,7 +27,7 @@ namespace zbackup::core
 
     private:
         interfaces::ICompress::ptr compress_;
-        interfaces::IAuthenticationService::ptr auth_service_;
-        std::shared_ptr<UserManager> user_manager_;
+        interfaces::IDataManager::ptr data_manager_;
+        interfaces::IUserManager::ptr user_manager_;
     };
 }

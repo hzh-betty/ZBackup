@@ -1,6 +1,6 @@
 #include "../../include/core/authentication_service.h"
 #include "../../include/core/service_container.h"
-#include "../../include/user/user_manager.h"
+#include "../../include/interfaces/user_manager_interface.h"
 #include "../../include/log/logger.h"
 
 namespace zbackup::core
@@ -68,10 +68,10 @@ namespace zbackup::core
 
             if (!user_manager_)
             {
-                user_manager_ = container.resolve<UserManager>();
+                user_manager_ = container.resolve<interfaces::IUserManager>();
                 if (!user_manager_)
                 {
-                    ZBACKUP_LOG_ERROR("Failed to resolve UserManager");
+                    ZBACKUP_LOG_ERROR("Failed to resolve IUserManager");
                     return false;
                 }
             }

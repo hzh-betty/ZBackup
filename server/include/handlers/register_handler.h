@@ -1,6 +1,6 @@
 #pragma once
 #include "base_handler.h"
-#include "../user/user_manager.h"
+#include "../interfaces/user_manager_interface.h"
 #include <regex>
 
 namespace zbackup
@@ -9,15 +9,15 @@ namespace zbackup
     class RegisterHandler final : public BaseHandler
     {
     public:
-        explicit RegisterHandler(UserManager::ptr user_manager);
+        explicit RegisterHandler(interfaces::IUserManager::ptr user_manager);
 
         void handle_request(const zhttp::HttpRequest &req, zhttp::HttpResponse *rsp) override;
 
     private:
-        UserManager::ptr user_manager_;
+        interfaces::IUserManager::ptr user_manager_;
 
         static bool validate_email(const std::string &email);
-
         static bool validate_password(const std::string &password);
     };
 }
+

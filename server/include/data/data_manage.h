@@ -1,49 +1,33 @@
 #pragma once
-#include "../util/util.h"
-#include "../storage/storage.h"
-#include <shared_mutex>
+#include "../interfaces/data_manager_interface.h"
+#include "../interfaces/backup_storage_interface.h"
+#include "../log/logger.h"
 #include <memory>
-#include <mutex>
 
 namespace zbackup
 {
-    class DataManager
+    class DataManager : public interfaces::IDataManager
     {
     public:
-        static DataManager *get_instance();
+        explicit DataManager(interfaces::IBackupStorage::ptr storage);
+        ~DataManager() override = default;
 
+        // 禁用拷贝和赋值
         DataManager(const DataManager &) = delete;
-
         DataManager &operator=(const DataManager &) = delete;
 
-        // 初始化存储后端
-        void initialize_storage(Storage::ptr storage);
-
-        bool insert(const BackupInfo &info) const;
-
-        bool update(const BackupInfo &info) const;
-
-        bool get_one_by_url(const std::string &url, BackupInfo *info) const;
-
-        bool get_one_by_real_path(const std::string &real_path, BackupInfo *info) const;
-
-        void get_all(std::vector<BackupInfo> *arry) const;
-
-        bool persistence() const;
-
-        bool delete_one(const BackupInfo &info) const;
-
-        bool delete_by_url(const std::string &url) const;
-
-        bool delete_by_real_path(const std::string &real_path) const;
+        // IDataManager 接口实现
+        bool insert(const info::BackupInfo &info) override;
+        bool update(const info::BackupInfo &info) override;
+        bool get_one_by_url(const std::string &url, info::BackupInfo *info) override;
+        bool get_one_by_real_path(const std::string &real_path, info::BackupInfo *info) override;
+        void get_all(std::vector<info::BackupInfo> *arry) override;
+        bool delete_one(const info::BackupInfo &info) override;
+        bool delete_by_url(const std::string &url) override;
+        bool delete_by_real_path(const std::string &real_path) override;
+        bool persistence() override;
 
     private:
-        DataManager() = default;
-
-        mutable std::shared_mutex rw_mutex_;
-        Storage::ptr storage_;
-
-        static std::unique_ptr<DataManager> instance_;
-        static std::once_flag init_flag_;
+        interfaces::IBackupStorage::ptr storage_;
     };
 }

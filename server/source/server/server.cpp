@@ -4,12 +4,11 @@
 #include "../../include/middleware/auth_middleware.h"
 #include "../../../ZHttpServer/include/session/session_manager.h"
 #include "../../../ZHttpServer/include/db_pool/redis_pool.h"
-#include "../../include/data/data_manage.h"
 #include "../../include/core/threadpool.h"
 
 namespace zbackup
 {
-    BackupServer::BackupServer(const interfaces::ICompress::ptr &comp, const Storage::ptr &storage)
+    BackupServer::BackupServer(const interfaces::ICompress::ptr &comp, const interfaces::IBackupStorage::ptr &storage)
         : looper_(std::make_shared<BackupLooper>(comp)), running_(false)
     {
         auto& container = core::ServiceContainer::get_instance();
@@ -25,10 +24,6 @@ namespace zbackup
 
         // 创建路由注册器
         route_registry_ = std::make_shared<core::DefaultRouteRegistry>(handler_factory, config_manager_);
-
-        // 初始化数据管理器并设置存储后端
-        auto* data_manager = DataManager::get_instance();
-        data_manager->initialize_storage(storage);
 
         // 初始化会话管理器
         zhttp::zsession::SessionManager::get_instance()

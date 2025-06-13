@@ -16,29 +16,40 @@ namespace zbackup::core
         : compress_(std::move(compress))
     {
         auto& container = ServiceContainer::get_instance();
-        auth_service_ = container.resolve<interfaces::IAuthenticationService>();
-        user_manager_ = container.resolve<UserManager>();
+        data_manager_ = container.resolve<interfaces::IDataManager>();
+        user_manager_ = container.resolve<interfaces::IUserManager>();
+        
+        if (!data_manager_) {
+            ZBACKUP_LOG_FATAL("DataManager not available in service container");
+            throw std::runtime_error("DataManager dependency not satisfied");
+        }
+        
+        if (!user_manager_) {
+            ZBACKUP_LOG_FATAL("UserManager not available in service container");
+            throw std::runtime_error("UserManager dependency not satisfied");
+        }
+        
         ZBACKUP_LOG_INFO("HandlerFactory initialized");
     }
 
     HandlerFactory::HandlerPtr HandlerFactory::create_upload_handler()
     {
-        return std::make_shared<UploadHandler>();
+        return std::make_shared<UploadHandler>(data_manager_);
     }
 
     HandlerFactory::HandlerPtr HandlerFactory::create_download_handler()
     {
-        return std::make_shared<DownloadHandler>(compress_);
+        return std::make_shared<DownloadHandler>(data_manager_, compress_);
     }
 
     HandlerFactory::HandlerPtr HandlerFactory::create_list_handler()
     {
-        return std::make_shared<ListShowHandler>();
+        return std::make_shared<ListShowHandler>(data_manager_);
     }
 
     HandlerFactory::HandlerPtr HandlerFactory::create_delete_handler()
     {
-        return std::make_shared<DeleteHandler>();
+        return std::make_shared<DeleteHandler>(data_manager_);
     }
 
     HandlerFactory::HandlerPtr HandlerFactory::create_static_handler()

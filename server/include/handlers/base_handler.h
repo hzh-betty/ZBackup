@@ -1,16 +1,13 @@
 #pragma once
 #include "../../../ZHttpServer/include/router/router_handler.h"
 #include "../interfaces/compress_interface.h"
+#include "../interfaces/data_manager_interface.h"
 #include "../util/util.h"
 #include "../log/logger.h"
-#include "../../include/data/data_manage.h"
+#include "../info/backup_info.h"
 
 namespace zbackup
 {
-    struct BackupInfo;
-    class DataManager;
-    class ICompress;
-
     // 基础处理器接口
     class IHandler : public zhttp::zrouter::RouterHandler
     {
@@ -25,7 +22,7 @@ namespace zbackup
     protected:
         BaseHandler() = default;
         // 获取 ETag - 静态工具方法
-        static std::string get_etag(const BackupInfo &info);
+        static std::string get_etag(const info::BackupInfo &info);
 
         // 时间转字符串 - 静态工具方法
         static std::string time_to_str(time_t t);
@@ -35,15 +32,17 @@ namespace zbackup
     class DataHandler : public BaseHandler
     {
     protected:
-        DataHandler();
-        DataManager *data_manager_ = DataManager::get_instance();
+        explicit DataHandler(interfaces::IDataManager::ptr data_manager);
+        interfaces::IDataManager::ptr data_manager_;
     };
 
     // 需要压缩功能的处理器基类
     class CompressHandler : public DataHandler
     {
     protected:
-        explicit CompressHandler(interfaces::ICompress::ptr comp);
+        explicit CompressHandler(interfaces::IDataManager::ptr data_manager, 
+                               interfaces::ICompress::ptr comp);
         interfaces::ICompress::ptr comp_;
     };
 }
+

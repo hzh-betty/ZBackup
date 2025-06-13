@@ -1,12 +1,13 @@
 #pragma once
 #include "looper.h"
 #include "../interfaces/compress_interface.h"
-#include "../storage/storage.h"
+#include "../interfaces/storage_interface.h"
 #include "../interfaces/config_manager_interface.h"
 #include "../interfaces/server_lifecycle_interface.h"
 #include "../interfaces/route_registry_interface.h"
 #include <memory>
 #include "../../../ZHttpServer/include/http/http_server.h"
+#include "../interfaces/backup_storage_interface.h"
 
 namespace zbackup
 {
@@ -15,7 +16,7 @@ namespace zbackup
     public:
         using ptr = std::shared_ptr<BackupServer>;
 
-        BackupServer(const interfaces::ICompress::ptr &comp, const Storage::ptr &storage);
+        BackupServer(const interfaces::ICompress::ptr &comp, const interfaces::IBackupStorage::ptr &storage);
 
         // IServerLifecycle 接口实现
         bool initialize() override;

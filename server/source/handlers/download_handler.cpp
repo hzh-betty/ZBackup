@@ -8,8 +8,11 @@
 namespace zbackup
 {
     // 下载处理器构造函数
-    DownloadHandler::DownloadHandler(interfaces::ICompress::ptr comp) : CompressHandler(std::move(comp))
+    DownloadHandler::DownloadHandler(interfaces::IDataManager::ptr data_manager, 
+                                   interfaces::ICompress::ptr comp) 
+        : CompressHandler(std::move(data_manager), std::move(comp))
     {
+        ZBACKUP_LOG_DEBUG("DownloadHandler initialized");
     }
 
     // 处理文件下载请求，支持断点续传
@@ -19,7 +22,7 @@ namespace zbackup
         ZBACKUP_LOG_DEBUG("Download request: {}", url_path);
 
         // 根据URL获取文件备份信息
-        BackupInfo info;
+        info::BackupInfo info;
         if (data_manager_->get_one_by_url(url_path, &info) == false)
         {
             ZBACKUP_LOG_WARN("File not found for download: {}", url_path);
@@ -84,7 +87,7 @@ namespace zbackup
 
     // 处理断点续传请求
     void DownloadHandler::handle_range_request(const zhttp::HttpRequest &req, zhttp::HttpResponse *rsp,
-                                               const BackupInfo &info, FileUtil &fu, int64_t file_size,
+                                               const info::BackupInfo &info, FileUtil &fu, int64_t file_size,
                                                const std::string &range_header)
     {
         ZBACKUP_LOG_DEBUG("Range request: {}", range_header);
@@ -154,7 +157,7 @@ namespace zbackup
     }
 
     // 处理完整文件下载请求
-    void DownloadHandler::handle_full_request(zhttp::HttpResponse *rsp, const BackupInfo &info, FileUtil &fu)
+    void DownloadHandler::handle_full_request(zhttp::HttpResponse *rsp, const info::BackupInfo &info, FileUtil &fu)
     {
         std::string file_content;
         if (!fu.get_content(&file_content))

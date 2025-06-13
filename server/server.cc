@@ -4,8 +4,17 @@
 #include "include/core/authentication_service.h"
 #include "include/core/session_service.h"
 #include "include/core/handler_factory.h"
+#include "include/data/data_manage.h"
 #include "include/user/user_manager.h"
 #include "include/compress/snappy_compress.h"
+#include "include/storage/database/database_backup_storage.h"
+#include "include/storage/database/database_user_storage.h"
+#include "include/interfaces/backup_storage_interface.h"
+#include "include/interfaces/user_storage_interface.h"
+#include "include/interfaces/data_manager_interface.h"
+#include "include/interfaces/user_manager_interface.h"
+#include "include/interfaces/compress_interface.h"
+#include "include/interfaces/handler_factory_interface.h"
 #include <muduo/base/Logging.h>
 #include "include/log/logger.h"
 #include "../ZHttpServer/include/log/logger.h"
@@ -14,16 +23,32 @@ void setup_dependencies()
 {
     auto& container = zbackup::core::ServiceContainer::get_instance();
     
-    // 注册配置服务
-    container.register_singleton<zbackup::interfaces::IConfigManager, zbackup::core::ConfigService>();
+    // 1. 首先注册配置服务（其他服务都依赖它）
+    auto config_service = std::make_shared<zbackup::core::ConfigService>();
+    container.register_instance<zbackup::interfaces::IConfigManager>(config_service);
+    ZBACKUP_LOG_INFO("ConfigService registered successfully");
     
-    // 注册用户管理器
-    container.register_singleton<zbackup::UserManager, zbackup::UserManager>();
+    //  初始化数据库连接池（需要配置服务）
+    zbackup::InitMysqlPool();
+    zbackup::InitRedisPool();
+
+    // 2. 注册存储层
+    container.register_singleton<zbackup::interfaces::IBackupStorage, zbackup::storage::DatabaseBackupStorage>();
+    container.register_singleton<zbackup::interfaces::IUserStorage, zbackup::storage::DatabaseUserStorage>();
     
-    // 注册会话管理器
+    // 3. 注册管理器（依赖存储层）
+    auto data_manager = std::make_shared<zbackup::DataManager>(
+        container.resolve<zbackup::interfaces::IBackupStorage>());
+    container.register_instance<zbackup::interfaces::IDataManager>(data_manager);
+    
+    auto user_manager = std::make_shared<zbackup::UserManager>(
+        container.resolve<zbackup::interfaces::IUserStorage>());
+    container.register_instance<zbackup::interfaces::IUserManager>(user_manager);
+    
+    // 4. 注册会话管理器
     container.register_singleton<zbackup::interfaces::ISessionManager, zbackup::core::SessionService>();
     
-    // 注册认证服务
+    // 5. 注册认证服务（依赖用户管理器和会话管理器）
     container.register_singleton<zbackup::interfaces::IAuthenticationService, zbackup::core::AuthenticationService>();
     
     ZBACKUP_LOG_INFO("Service dependencies configured successfully");
@@ -37,24 +62,21 @@ int main()
     zbackup::Log::Init(zlog::LogLevel::value::INFO);
 
     try {
-        // 设置依赖注入
+        // 1. 设置依赖注入（在使用配置之前）
         setup_dependencies();
         
-        // 初始化数据库连接池
-        zbackup::InitMysqlPool();
-        zbackup::InitRedisPool();
         ZBACKUP_LOG_INFO("ZBackup server starting...");
 
-        // 创建核心组件
+        // 2. 创建核心组件
         auto& container = zbackup::core::ServiceContainer::get_instance();
         zbackup::interfaces::ICompress::ptr compress(new zbackup::SnappyCompress());
-        zbackup::Storage::ptr storage(new zbackup::DatabaseStorage());
         
-        // 注册处理器工厂
+        // 3. 注册处理器工厂
         auto handler_factory = std::make_shared<zbackup::core::HandlerFactory>(compress);
         container.register_instance<zbackup::interfaces::IHandlerFactory>(handler_factory);
         
-        // 创建服务器
+        // 4. 创建服务器
+        auto storage = container.resolve<zbackup::interfaces::IBackupStorage>();
         zbackup::BackupServer::ptr server(new zbackup::BackupServer(compress, storage));
 
         ZBACKUP_LOG_INFO("Thread pool started successfully");

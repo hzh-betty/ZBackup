@@ -1,6 +1,7 @@
 #include <utility>
 
 #include "../../include/handlers/static_handler.h"
+#include "../../include/util/util.h"
 
 namespace zbackup
 {
