@@ -1,9 +1,9 @@
 #pragma once
-#include "../interfaces/handler_factory_interface.h"
-#include "../interfaces/auth_manager_interface.h"
-#include "../interfaces/compress_interface.h"
-#include "../interfaces/data_manager_interface.h"
-#include "../interfaces/user_manager_interface.h"
+#include "interfaces/handler_factory_interface.h"
+#include "interfaces/compress_interface.h"
+#include "interfaces/data_manager_interface.h"
+#include "interfaces/user_manager_interface.h"
+#include <memory>
 
 namespace zbackup::core
 {

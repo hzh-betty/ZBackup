@@ -1,10 +1,11 @@
 #include <utility>
-#include "../../include/server/looper.h"
-#include "../../include/core/service_container.h"
-#include "../../include/core/threadpool.h"
-#include "../../include/interfaces/config_manager_interface.h"
-#include "../../include/util/util.h"
-#include "../../include/data/data_manage.h"
+#include "server/looper.h"
+#include "core/service_container.h"
+#include "core/threadpool.h"
+#include "interfaces/config_manager_interface.h"
+#include "util/util.h"
+#include "data/data_manager.h"
+#include "log/backup_logger.h"
 
 namespace zbackup
 {
@@ -51,7 +52,7 @@ namespace zbackup
         while (!stop_)
         {
             // 1. 遍历备份目录，获取所有文件名
-            FileUtil fu(back_dir);
+            util::FileUtil fu(back_dir);
             std::vector<std::string> arry;
             fu.scan_directory(&arry);
 
@@ -104,13 +105,13 @@ namespace zbackup
             return;
         }
 
-        FileUtil tmp(str);
+        util::FileUtil tmp(str);
         // 5. 删除源文件
         if (!tmp.remove_file())
         {
             ZBACKUP_LOG_ERROR("Failed to remove source file after compression: {}", str);
             // 如果删除源文件失败，也删除压缩文件
-            FileUtil pack_tmp(bi.pack_path_);
+            util::FileUtil pack_tmp(bi.pack_path_);
             pack_tmp.remove_file();
             return;
         }
@@ -128,7 +129,7 @@ namespace zbackup
     // 判断文件是否为热点文件（长时间未访问）
     bool BackupLooper::hot_judge(const std::string &filename, const int hot_time)
     {
-        FileUtil fu(filename);
+        util::FileUtil fu(filename);
         time_t last_atime = fu.get_last_atime();
         time_t cur_time = time(nullptr);
         return (cur_time - last_atime > hot_time);

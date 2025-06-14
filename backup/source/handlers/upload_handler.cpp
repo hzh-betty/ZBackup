@@ -1,10 +1,12 @@
 #include <utility>
-#include "../../include/interfaces/config_manager_interface.h"
-#include "../../include/interfaces/storage_interface.h"
-#include "../../include/handlers/upload_handler.h"
-#include "../../include/core/service_container.h"
-#include "../../include/util/util.h"
+#include "interfaces/config_manager_interface.h"
+#include "interfaces/storage_interface.h"
+#include "handlers/upload_handler.h"
+#include "core/service_container.h"
+#include "util/util.h"
 #include <nlohmann/json.hpp>
+#include "log/backup_logger.h"
+#include <regex>
 
 namespace zbackup
 {
@@ -85,15 +87,18 @@ namespace zbackup
         while ((pos = body.find(boundary, pos)) != std::string::npos)
         {
             size_t part_start = pos + boundary.size();
-            if (body.substr(part_start, 2) == "--") break;
+            if (body.substr(part_start, 2) == "--")
+                break;
 
             size_t header_end = body.find("\r\n\r\n", part_start);
-            if (header_end == std::string::npos) break;
+            if (header_end == std::string::npos)
+                break;
 
             std::string headers = body.substr(part_start, header_end - part_start);
             size_t content_start = header_end + 4;
             size_t next_boundary = body.find(boundary, content_start);
-            if (next_boundary == std::string::npos) break;
+            if (next_boundary == std::string::npos)
+                break;
 
             size_t content_len = next_boundary - content_start;
             std::string part_content = body.substr(content_start, content_len);
@@ -120,17 +125,18 @@ namespace zbackup
 
     bool UploadHandler::save_file(const std::string &filename, const std::string &file_content) const
     {
-        auto& container = core::ServiceContainer::get_instance();
+        auto &container = core::ServiceContainer::get_instance();
         auto config = container.resolve<interfaces::IConfigManager>();
-        
-        if (!config) {
+
+        if (!config)
+        {
             ZBACKUP_LOG_ERROR("ConfigManager not available for file save");
             return false;
         }
-        
+
         std::string back_dir = config->get_string("back_dir", "./backup/");
-        std::string real_path = back_dir + FileUtil(filename).get_name();
-        FileUtil fu(real_path);
+        std::string real_path = back_dir + util::FileUtil(filename).get_name();
+        util::FileUtil fu(real_path);
 
         if (fu.set_content(file_content) == false)
         {

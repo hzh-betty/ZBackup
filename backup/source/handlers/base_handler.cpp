@@ -1,8 +1,8 @@
 #include <utility>
 #include <ctime>
-#include "../../include/log/logger.h"
-#include "../../include/handlers/base_handler.h"
-#include "../../include/core/service_container.h"
+#include "log/backup_logger.h"
+#include "handlers/base_handler.h"
+#include "core/service_container.h"
 
 namespace zbackup
 {

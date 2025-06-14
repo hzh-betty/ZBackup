@@ -1,8 +1,9 @@
-#include "../../include/handlers/register_handler.h"
-#include "../../include/util/util.h"
+#include "handlers/register_handler.h"
+#include "util/util.h"
 #include <nlohmann/json.hpp>
 #include <utility>
-
+#include "log/backup_logger.h"
+#include <regex>
 namespace zbackup
 {
     RegisterHandler::RegisterHandler(interfaces::IUserManager::ptr user_manager)
@@ -26,7 +27,7 @@ namespace zbackup
         }
 
         nlohmann::json req_json;
-        if (!JsonUtil::deserialize(&req_json, req.get_content()))
+        if (!util::JsonUtil::deserialize(&req_json, req.get_content()))
         {
             rsp->set_status_code(zhttp::HttpResponse::StatusCode::BadRequest);
             rsp->set_status_message("Bad Request");
@@ -84,7 +85,7 @@ namespace zbackup
             resp_json["message"] = "Registration successful";
 
             std::string response_body;
-            JsonUtil::serialize(resp_json, &response_body);
+            util::JsonUtil::serialize(resp_json, &response_body);
 
             rsp->set_status_code(zhttp::HttpResponse::StatusCode::Created);
             rsp->set_status_message("Created");
@@ -100,7 +101,7 @@ namespace zbackup
             resp_json["error"] = "Registration failed, username may already exist";
 
             std::string response_body;
-            JsonUtil::serialize(resp_json, &response_body);
+            util::JsonUtil::serialize(resp_json, &response_body);
 
             rsp->set_status_code(zhttp::HttpResponse::StatusCode::Conflict);
             rsp->set_status_message("Conflict");

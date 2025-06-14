@@ -1,9 +1,8 @@
 #include <utility>
 
-#include "../../include/handlers/download_handler.h"
-#include "../../include/storage/storage.h"
-#include "../../include/compress/snappy_compress.h"
-
+#include "handlers/download_handler.h"
+#include "compress/snappy_compress.h"
+#include "log/backup_logger.h"
 
 namespace zbackup
 {
@@ -47,7 +46,7 @@ namespace zbackup
             }
 
             // 删除压缩包并更新备份信息
-            FileUtil fu_pack(info.pack_path_);
+            util::FileUtil fu_pack(info.pack_path_);
             if (fu_pack.remove_file() == false)
             {
                 ZBACKUP_LOG_WARN("Failed to remove pack file after decompression: {}", info.pack_path_);
@@ -69,7 +68,7 @@ namespace zbackup
         }
 
         // 检查是否需要断点续传
-        FileUtil fu(info.real_path_);
+        util::FileUtil fu(info.real_path_);
         int64_t file_size = fu.get_size();
         std::string range_header = req.get_header("Range");
         std::string old_etag = req.get_header("If-Range");
@@ -87,7 +86,7 @@ namespace zbackup
 
     // 处理断点续传请求
     void DownloadHandler::handle_range_request(const zhttp::HttpRequest &req, zhttp::HttpResponse *rsp,
-                                               const info::BackupInfo &info, FileUtil &fu, int64_t file_size,
+                                               const info::BackupInfo &info, util::FileUtil &fu, int64_t file_size,
                                                const std::string &range_header)
     {
         ZBACKUP_LOG_DEBUG("Range request: {}", range_header);
@@ -157,7 +156,7 @@ namespace zbackup
     }
 
     // 处理完整文件下载请求
-    void DownloadHandler::handle_full_request(zhttp::HttpResponse *rsp, const info::BackupInfo &info, FileUtil &fu)
+    void DownloadHandler::handle_full_request(zhttp::HttpResponse *rsp, const info::BackupInfo &info, util::FileUtil &fu)
     {
         std::string file_content;
         if (!fu.get_content(&file_content))

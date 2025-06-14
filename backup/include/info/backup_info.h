@@ -1,6 +1,5 @@
 #pragma once
-#include "../interfaces/base_info_interface.h"
-#include "../util/util.h"
+#include "interfaces/base_info_interface.h"
 #include <ctime>
 
 namespace zbackup::info

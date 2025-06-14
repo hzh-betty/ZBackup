@@ -1,7 +1,5 @@
 #pragma once
-#include "../interfaces/compress_interface.h"
-#include "../log/logger.h"
-#include "../util/util.h"
+#include "interfaces/compress_interface.h"
 #include <snappy.h>
 
 namespace zbackup

@@ -1,7 +1,8 @@
-#include "../../include/user/user_manager.h"
+#include "user/user_manager.h"
 #include <iomanip>
 #include <sstream>
 #include <functional>
+#include "log/backup_logger.h"
 
 namespace zbackup
 {

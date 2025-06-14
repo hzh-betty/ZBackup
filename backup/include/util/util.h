@@ -6,9 +6,8 @@
 #include <filesystem>
 #include <sys/stat.h>
 #include <nlohmann/json.hpp>
-#include "../log/logger.h"
 
-namespace zbackup
+namespace zbackup::util
 {
     namespace fs = std::filesystem;
 
@@ -19,23 +18,23 @@ namespace zbackup
         explicit FileUtil(std::string pathname);
 
         // 文件删除操作
-        bool remove_file(); // 删除单个文件
+        bool remove_file();      // 删除单个文件
         bool remove_directory(); // 删除目录
-        bool force_remove(); // 强制删除文件或目录
-        bool exists() const; // 检查文件是否存在
-        bool create_file(); // 创建空文件
+        bool force_remove();     // 强制删除文件或目录
+        bool exists() const;     // 检查文件是否存在
+        bool create_file();      // 创建空文件
         bool create_directory(); // 创建目录
 
         // 文件信息获取
-        [[nodiscard]] int64_t get_size() const; // 获取文件大小
+        [[nodiscard]] int64_t get_size() const;      // 获取文件大小
         [[nodiscard]] time_t get_last_mtime() const; // 获取最后修改时间
         [[nodiscard]] time_t get_last_atime() const; // 获取最后访问时间
-        [[nodiscard]] std::string get_name() const; // 获取文件名
+        [[nodiscard]] std::string get_name() const;  // 获取文件名
 
         // 文件内容操作
         bool get_pos_len(std::string *body, size_t pos, size_t len); // 读取指定位置和长度
-        bool get_content(std::string *body); // 读取整个文件内容
-        bool set_content(const std::string &body); // 写入文件内容
+        bool get_content(std::string *body);                         // 读取整个文件内容
+        bool set_content(const std::string &body);                   // 写入文件内容
 
         // 目录操作
         void scan_directory(std::vector<std::string> *arry); // 扫描目录中的文件
@@ -48,15 +47,18 @@ namespace zbackup
     class JsonUtil
     {
     public:
-        static bool serialize(const nlohmann::json &root, std::string *str); // 序列化
+        static bool serialize(const nlohmann::json &root, std::string *str);   // 序列化
         static bool deserialize(nlohmann::json *root, const std::string &str); // 反序列化
     };
 
-    // 初始化MySQL连接池
-    void InitMysqlPool();
-    // 初始化Redis连接池
-    void InitRedisPool();
-    
+    class DataBaseInit
+    {
+    public:
+        // 初始化MySQL连接池
+        static void InitMysqlPool();
+        // 初始化Redis连接池
+        static void InitRedisPool();
+    };
     // 时间转换函数
     std::string time_to_str(time_t timestamp);
 }

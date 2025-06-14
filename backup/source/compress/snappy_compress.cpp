@@ -1,10 +1,11 @@
-#include "../../include/compress/snappy_compress.h"
-
+#include "compress/snappy_compress.h"
+#include "log/backup_logger.h"
+#include "util/util.h"
 namespace zbackup
 {
     bool SnappyCompress::compress(const std::string& source_path, const std::string& target_path)
     {
-        FileUtil tu(source_path);
+        util::FileUtil tu(source_path);
         std::string body;
         if (tu.get_content(&body) == false)
         {
@@ -21,7 +22,7 @@ namespace zbackup
             return false;
         }
 
-        FileUtil fu(target_path);
+        util::FileUtil fu(target_path);
         if (!fu.set_content(packed))
         {
             ZBACKUP_LOG_ERROR("Failed to write compressed data to: {}", target_path);
@@ -35,7 +36,7 @@ namespace zbackup
 
     bool SnappyCompress::un_compress(const std::string& target_path, const std::string& source_path)
     {
-        FileUtil tu(source_path);
+        util::FileUtil tu(source_path);
         std::string body;
         if (tu.get_content(&body) == false)
         {
@@ -59,7 +60,7 @@ namespace zbackup
             return false;
         }
 
-        FileUtil fu(target_path);
+        util::FileUtil fu(target_path);
         if (!fu.set_content(unpacked))
         {
             ZBACKUP_LOG_ERROR("Failed to write decompressed data to: {}", target_path);

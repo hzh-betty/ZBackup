@@ -1,10 +1,10 @@
-#include "../../include/server/main.h"
-#include "../../include/core/service_container.h"
-#include "../../include/core/route_registry.h"
-#include "../../include/middleware/auth_middleware.h"
-#include "../../../ZHttpServer/include/session/session_manager.h"
-#include "../../../ZHttpServer/include/db_pool/redis_pool.h"
-#include "../../include/core/threadpool.h"
+#include "server/server.h"
+#include "core/service_container.h"
+#include "core/route_registry.h"
+#include "middleware/auth_middleware.h"
+#include "session/session_manager.h"
+#include "core/threadpool.h"
+#include "log/backup_logger.h"
 
 namespace zbackup
 {

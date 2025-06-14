@@ -8,7 +8,7 @@
 #include <queue>
 #include <future>
 #include <chrono>
-#include "../log/logger.h"
+#include "log/backup_logger.h"
 
 namespace zbackup::core
 {

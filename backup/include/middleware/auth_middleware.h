@@ -1,8 +1,7 @@
 #pragma once
-#include "../../../ZHttpServer/include/middleware/middleware.h"
-#include "../log/logger.h"
-#include "../util/util.h"
-#include "../../../ZHttpServer/include/session/session_manager.h"
+#include "middleware/middleware.h"
+#include "util/util.h"
+#include "session/session_manager.h"
 
 namespace zbackup
 {

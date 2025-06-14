@@ -1,7 +1,6 @@
 #pragma once
-#include "../interfaces/data_manager_interface.h"
-#include "../interfaces/backup_storage_interface.h"
-#include "../log/logger.h"
+#include "interfaces/data_manager_interface.h"
+#include "interfaces/backup_storage_interface.h"
 #include <memory>
 
 namespace zbackup

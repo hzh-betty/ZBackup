@@ -1,6 +1,8 @@
-#include "../../../include/storage/file/file_backup_storage.h"
-#include "../../../include/core/service_container.h"
-#include "../../../include/interfaces/config_manager_interface.h"
+#include "storage/file/file_backup_storage.h"
+#include "core/service_container.h"
+#include "interfaces/config_manager_interface.h"
+#include "log/backup_logger.h"
+#include "util/util.h"
 
 namespace zbackup::storage
 {
@@ -11,7 +13,7 @@ namespace zbackup::storage
         backup_file_ = config->get_string("backup_file", "./data/backup.dat");
         
         // 确保数据目录存在
-        FileUtil data_dir("./data/");
+        util::FileUtil data_dir("./data/");
         data_dir.create_directory();
         
         init_load();
@@ -163,7 +165,7 @@ namespace zbackup::storage
 
     bool FileBackupStorage::init_load()
     {
-        FileUtil fu(backup_file_);
+        util::FileUtil fu(backup_file_);
         if (!fu.exists())
         {
             ZBACKUP_LOG_INFO("Backup file not found, starting with empty storage: {}", backup_file_);
@@ -178,7 +180,7 @@ namespace zbackup::storage
         }
 
         nlohmann::json root;
-        if (!JsonUtil::deserialize(&root, body))
+        if (!util::JsonUtil::deserialize(&root, body))
         {
             ZBACKUP_LOG_ERROR("Failed to parse backup file: {}", backup_file_);
             return false;
@@ -218,13 +220,13 @@ namespace zbackup::storage
         }
 
         std::string body;
-        if (!JsonUtil::serialize(root, &body))
+        if (!util::JsonUtil::serialize(root, &body))
         {
             ZBACKUP_LOG_ERROR("Failed to serialize backup data");
             return false;
         }
 
-        FileUtil fu(backup_file_);
+        util::FileUtil fu(backup_file_);
         if (!fu.set_content(body))
         {
             ZBACKUP_LOG_ERROR("Failed to write backup file: {}", backup_file_);

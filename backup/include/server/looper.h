@@ -1,6 +1,5 @@
 #pragma once
-#include "../interfaces/compress_interface.h"
-#include "../log/logger.h"
+#include "interfaces/compress_interface.h"
 #include <memory>
 #include <atomic>
 #include <thread>

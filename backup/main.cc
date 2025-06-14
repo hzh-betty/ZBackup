@@ -1,23 +1,18 @@
-#include "include/server/main.h"
-#include "include/core/service_container.h"
-#include "include/core/config_service.h"
-#include "include/core/authentication_service.h"
-#include "include/core/session_service.h"
-#include "include/core/handler_factory.h"
-#include "include/data/data_manage.h"
-#include "include/user/user_manager.h"
-#include "include/compress/snappy_compress.h"
-#include "include/storage/database/database_backup_storage.h"
-#include "include/storage/database/database_user_storage.h"
-#include "include/interfaces/backup_storage_interface.h"
-#include "include/interfaces/user_storage_interface.h"
-#include "include/interfaces/data_manager_interface.h"
-#include "include/interfaces/user_manager_interface.h"
-#include "include/interfaces/compress_interface.h"
-#include "include/interfaces/handler_factory_interface.h"
+#include "server/server.h"
+#include "core/service_container.h"
+#include "core/config_service.h"
+#include "core/authentication_service.h"
+#include "core/session_service.h"
+#include "core/handler_factory.h"
+#include "data/data_manager.h"
+#include "user/user_manager.h"
+#include "compress/snappy_compress.h"
+#include "storage/database/database_backup_storage.h"
+#include "storage/database/database_user_storage.h"
 #include <muduo/base/Logging.h>
-#include "include/log/logger.h"
-#include "../ZHttpServer/include/http_log/logger.h"
+#include "log/backup_logger.h"
+#include "log/http_logger.h"
+#include "util/util.h"
 
 void setup_dependencies()
 {
@@ -28,15 +23,15 @@ void setup_dependencies()
     container.register_instance<zbackup::interfaces::IConfigManager>(config_service);
     ZBACKUP_LOG_INFO("ConfigService registered successfully");
     
-    //  初始化数据库连接池（需要配置服务）
-    zbackup::InitMysqlPool();
-    zbackup::InitRedisPool();
+    //  2. 初始化数据库连接池（需要配置服务）
+    zbackup::util::DataBaseInit::InitMysqlPool();
+    zbackup::util::DataBaseInit::InitMysqlPool();
 
-    // 2. 注册存储层
+    // 3. 注册存储层（需要数据库配置）
     container.register_singleton<zbackup::interfaces::IBackupStorage, zbackup::storage::DatabaseBackupStorage>();
     container.register_singleton<zbackup::interfaces::IUserStorage, zbackup::storage::DatabaseUserStorage>();
     
-    // 3. 注册管理器（依赖存储层）
+    // 4. 注册管理器（依赖存储层）
     auto data_manager = std::make_shared<zbackup::DataManager>(
         container.resolve<zbackup::interfaces::IBackupStorage>());
     container.register_instance<zbackup::interfaces::IDataManager>(data_manager);

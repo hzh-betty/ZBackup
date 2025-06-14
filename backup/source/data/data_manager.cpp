@@ -1,6 +1,6 @@
 #include <utility>
-#include "../../include/data/data_manage.h"
-
+#include "data/data_manager.h"
+#include "log/backup_logger.h"
 namespace zbackup
 {
     DataManager::DataManager(interfaces::IBackupStorage::ptr storage)

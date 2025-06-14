@@ -1,8 +1,8 @@
 #pragma once
 #include <string>
 #include <memory>
-#include "../../../ZHttpServer/include/http/http_request.h"
-#include "../../../ZHttpServer/include/http/http_response.h"
+#include "http/http_request.h"
+#include "http/http_response.h"
 
 namespace zbackup::interfaces
 {

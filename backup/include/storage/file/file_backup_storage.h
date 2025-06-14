@@ -1,6 +1,6 @@
 #pragma once
-#include "../../interfaces/backup_storage_interface.h"
-#include "../../info/backup_info.h"
+#include "interfaces/backup_storage_interface.h"
+#include "info/backup_info.h"
 #include <unordered_map>
 #include <mutex>
 

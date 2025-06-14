@@ -1,8 +1,8 @@
-#include "../../include/core/route_registry.h"
-#include "../../include/util/util.h"
-#include "../../include/core/service_container.h"
-#include "../../include/interfaces/auth_manager_interface.h"
-#include "../../include/interfaces/session_manager_interface.h"
+#include "core/route_registry.h"
+#include "util/util.h"
+#include "core/service_container.h"
+#include "interfaces/auth_manager_interface.h"
+#include "interfaces/session_manager_interface.h"
 #include <nlohmann/json.hpp>
 
 namespace zbackup::core
@@ -62,7 +62,7 @@ namespace zbackup::core
         server->Post("/logout", logout_handler);
 
         // 注册下载路由
-        std::string download_url = config_manager_->get_download_prefix() + "(.*)";
+        std::string download_url = config_manager_->get_download_prefix() + ":filename";
         server->add_regex_route(zhttp::HttpRequest::Method::GET, download_url, download_handler);
     }
 
@@ -97,7 +97,7 @@ namespace zbackup::core
             }
 
             std::string response_body;
-            JsonUtil::serialize(status_json, &response_body);
+            util::JsonUtil::serialize(status_json, &response_body);
 
             rsp->set_status_code(zhttp::HttpResponse::StatusCode::OK);
             rsp->set_status_message("OK");

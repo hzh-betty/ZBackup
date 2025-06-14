@@ -1,9 +1,8 @@
 #include <utility>
-
-#include "../../include/handlers/delete_handler.h"
-#include "../../include/util/util.h"
+#include "handlers/delete_handler.h"
+#include "util/util.h"
 #include <nlohmann/json.hpp>
-
+#include "log/backup_logger.h"
 namespace zbackup
 {
     DeleteHandler::DeleteHandler(interfaces::IDataManager::ptr data_manager)
@@ -14,8 +13,21 @@ namespace zbackup
 
     void DeleteHandler::handle_request(const zhttp::HttpRequest &req, zhttp::HttpResponse *rsp)
     {
-        std::string file_url = req.get_path();
-        ZBACKUP_LOG_INFO("Delete request: {}", file_url);
+        // 从查询参数中获取要删除的文件URL
+        std::string file_url = req.get_query_parameters("file");
+        if (file_url.empty()) {
+            // 如果查询参数为空，尝试从路径中获取（兼容其他格式）
+            file_url = req.get_path();
+            if (file_url == "/delete") {
+                ZBACKUP_LOG_WARN("Delete request missing file parameter");
+                rsp->set_status_code(zhttp::HttpResponse::StatusCode::BadRequest);
+                rsp->set_status_message("Bad Request");
+                rsp->set_body("Missing file parameter");
+                return;
+            }
+        }
+        
+        ZBACKUP_LOG_INFO("Delete request for file: {}", file_url);
 
         info::BackupInfo info;
         if (!data_manager_->get_one_by_url(file_url, &info))
@@ -27,7 +39,7 @@ namespace zbackup
             return;
         }
 
-        FileUtil fu(info.real_path_);
+        util::FileUtil fu(info.real_path_);
         if (!fu.remove_file())
         {
             ZBACKUP_LOG_ERROR("Failed to delete file: {}", info.real_path_);
@@ -39,7 +51,7 @@ namespace zbackup
 
         if (info.pack_flag_)
         {
-            FileUtil pack_fu(info.pack_path_);
+            util::FileUtil pack_fu(info.pack_path_);
             if (!pack_fu.remove_file())
             {
                 ZBACKUP_LOG_WARN("Failed to delete pack file: {}", info.pack_path_);

@@ -1,7 +1,8 @@
 #include <utility>
 
-#include "../../include/handlers/static_handler.h"
-#include "../../include/util/util.h"
+#include "handlers/static_handler.h"
+#include "util/util.h"
+#include "log/backup_logger.h"
 
 namespace zbackup
 {
@@ -39,7 +40,7 @@ namespace zbackup
 
         // 构建web根文件路径
         std::string file_path = "../resource/" + path;
-        FileUtil fu(file_path);
+        util::FileUtil fu(file_path);
 
         if (!fu.exists())
         {

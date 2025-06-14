@@ -1,7 +1,8 @@
-#include "../../include/core/authentication_service.h"
-#include "../../include/core/service_container.h"
-#include "../../include/interfaces/user_manager_interface.h"
-#include "../../include/log/logger.h"
+#include "core/authentication_service.h"
+#include "core/service_container.h"
+#include "interfaces/user_manager_interface.h"
+#include "log/backup_logger.h"
+
 
 namespace zbackup::core
 {

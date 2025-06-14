@@ -1,8 +1,8 @@
 #pragma once
-#include "../interfaces/route_registry_interface.h"
-#include "../interfaces/handler_factory_interface.h"
-#include "../interfaces/config_manager_interface.h"
-#include "../../../ZHttpServer/include/http/http_server.h"
+#include "interfaces/route_registry_interface.h"
+#include "interfaces/handler_factory_interface.h"
+#include "interfaces/config_manager_interface.h"
+#include "http/http_server.h"
 #include <memory>
 
 namespace zbackup::core

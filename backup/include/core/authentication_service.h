@@ -1,8 +1,7 @@
 #pragma once
-#include "../interfaces/auth_manager_interface.h"
-#include "../interfaces/session_manager_interface.h"
-#include "../interfaces/user_manager_interface.h"
-#include "../log/logger.h"
+#include "interfaces/auth_manager_interface.h"
+#include "interfaces/session_manager_interface.h"
+#include "interfaces/user_manager_interface.h"
 #include <memory>
 
 namespace zbackup::core

@@ -4,7 +4,7 @@
 #include <typeindex>
 #include <functional>
 #include <mutex>
-#include "../log/logger.h"
+#include "log/backup_logger.h"
 
 namespace zbackup::core
 {

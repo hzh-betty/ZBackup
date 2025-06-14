@@ -1,10 +1,7 @@
 #pragma once
-#include "../../../ZHttpServer/include/router/router_handler.h"
-#include "../interfaces/compress_interface.h"
-#include "../interfaces/data_manager_interface.h"
-#include "../util/util.h"
-#include "../log/logger.h"
-#include "../info/backup_info.h"
+#include "router/router_handler.h"
+#include "interfaces/compress_interface.h"
+#include "interfaces/data_manager_interface.h"
 
 namespace zbackup
 {

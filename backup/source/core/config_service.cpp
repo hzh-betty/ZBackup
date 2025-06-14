@@ -1,6 +1,7 @@
-#include "../../include/core/config_service.h"
-#include "../../include/util/util.h"
-#include "../../include/log/logger.h"
+#include "core/config_service.h"
+#include "util/util.h"
+#include "log/backup_logger.h"
+
 
 namespace zbackup::core
 {
@@ -13,7 +14,7 @@ namespace zbackup::core
 
     bool ConfigService::load_config()
     {
-        FileUtil fu(config_file_);
+        util::FileUtil fu(config_file_);
         std::string body;
 
         if (!fu.exists())
@@ -28,7 +29,7 @@ namespace zbackup::core
             return false;
         }
 
-        if (!JsonUtil::deserialize(&config_json_, body))
+        if (!util::JsonUtil::deserialize(&config_json_, body))
         {
             ZBACKUP_LOG_ERROR("Failed to parse config file: {}", config_file_);
             return false;
@@ -45,8 +46,8 @@ namespace zbackup::core
         std::string back_dir = get_string("back_dir", "./backup/");
         std::string pack_dir = get_string("pack_dir", "./pack/");
 
-        FileUtil back_util(back_dir);
-        FileUtil pack_util(pack_dir);
+        util::FileUtil back_util(back_dir);
+        util::FileUtil pack_util(pack_dir);
 
         if (!back_util.create_directory())
         {

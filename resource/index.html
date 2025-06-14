@@ -460,7 +460,7 @@
                 return;
             }
 
-            fetch(`/delete?url=${encodeURIComponent(url)}`, {
+            fetch(`/delete?file=${encodeURIComponent(url)}`, {
                 method: 'DELETE'
             })
             .then(response => {

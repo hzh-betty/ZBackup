@@ -1,6 +1,5 @@
 #pragma once
-#include "../interfaces/config_manager_interface.h"
-#include "../log/logger.h"
+#include "interfaces/config_manager_interface.h"
 #include <nlohmann/json.hpp>
 
 namespace zbackup::core

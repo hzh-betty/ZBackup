@@ -1,26 +1,27 @@
-#include "../../include/info/backup_info.h"
-#include "../../include/core/service_container.h"
-#include "../../include/interfaces/config_manager_interface.h"
-#include "../../include/log/logger.h"
+#include "info/backup_info.h"
+#include "core/service_container.h"
+#include "interfaces/config_manager_interface.h"
+#include "util/util.h"
+#include "log/backup_logger.h"
 #include <nlohmann/json.hpp>
 
 namespace zbackup::info
 {
-    BackupInfo::BackupInfo(const std::string& real_path)
+    BackupInfo::BackupInfo(const std::string &real_path)
     {
         new_backup_info(real_path);
     }
 
-        bool BackupInfo::new_backup_info(const std::string &real_path)
+    bool BackupInfo::new_backup_info(const std::string &real_path)
     {
-        FileUtil fu(real_path);
+        util::FileUtil fu(real_path);
         if (!fu.exists())
         {
             ZBACKUP_LOG_ERROR("File not exists when creating backup info: {}", real_path);
             return false;
         }
 
-        auto& container = core::ServiceContainer::get_instance();
+        auto &container = core::ServiceContainer::get_instance();
         auto config = container.resolve<interfaces::IConfigManager>();
 
         std::string pack_dir = config->get_string("pack_dir", "./pack/");
@@ -38,7 +39,7 @@ namespace zbackup::info
         ZBACKUP_LOG_DEBUG("Backup info created: {} -> {}", real_path, url_);
         return true;
     }
-    
+
     std::string BackupInfo::serialize() const
     {
         nlohmann::json j;
@@ -52,7 +53,7 @@ namespace zbackup::info
         return j.dump();
     }
 
-    bool BackupInfo::deserialize(const std::string& data)
+    bool BackupInfo::deserialize(const std::string &data)
     {
         try
         {
@@ -66,7 +67,7 @@ namespace zbackup::info
             url_ = j.value("url", "");
             return true;
         }
-        catch (const std::exception& e)
+        catch (const std::exception &e)
         {
             ZBACKUP_LOG_ERROR("Failed to deserialize BackupInfo: {}", e.what());
             return false;

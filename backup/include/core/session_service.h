@@ -1,7 +1,6 @@
 #pragma once
-#include "../interfaces/session_manager_interface.h"
-#include "../log/logger.h"
-#include "../../../ZHttpServer/include/session/session_manager.h"
+#include "interfaces/session_manager_interface.h"
+#include "session/session_manager.h"
 
 namespace zbackup::core
 {

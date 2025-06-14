@@ -1,13 +1,13 @@
 #pragma once
 #include "looper.h"
-#include "../interfaces/compress_interface.h"
-#include "../interfaces/storage_interface.h"
-#include "../interfaces/config_manager_interface.h"
-#include "../interfaces/server_lifecycle_interface.h"
-#include "../interfaces/route_registry_interface.h"
+#include "interfaces/compress_interface.h"
+#include "interfaces/storage_interface.h"
+#include "interfaces/config_manager_interface.h"
+#include "interfaces/server_lifecycle_interface.h"
+#include "interfaces/route_registry_interface.h"
 #include <memory>
-#include "../../../ZHttpServer/include/http/http_server.h"
-#include "../interfaces/backup_storage_interface.h"
+#include "http/http_server.h"
+#include "interfaces/backup_storage_interface.h"
 
 namespace zbackup
 {

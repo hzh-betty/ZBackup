@@ -1,5 +1,6 @@
-#include "../../../include/storage/database/database_backup_storage.h"
-#include "../../../include/log/logger.h"
+#include "storage/database/database_backup_storage.h"
+#include "log/backup_logger.h"
+
 
 namespace zbackup::storage
 {

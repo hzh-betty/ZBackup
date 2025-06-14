@@ -1,9 +1,10 @@
-#include "../../include/handlers/login_handler.h"
-#include "../../include/core/service_container.h"
-#include "../../include/interfaces/auth_manager_interface.h"
-#include "../../include/interfaces/user_manager_interface.h"
-#include "../../include/util/util.h"
+#include "handlers/login_handler.h"
+#include "core/service_container.h"
+#include "interfaces/auth_manager_interface.h"
+#include "interfaces/user_manager_interface.h"
+#include "util/util.h"
 #include <nlohmann/json.hpp>
+#include "log/backup_logger.h"
 
 namespace zbackup
 {
@@ -29,7 +30,7 @@ namespace zbackup
         }
 
         nlohmann::json req_json;
-        if (!JsonUtil::deserialize(&req_json, req.get_content()))
+        if (!util::JsonUtil::deserialize(&req_json, req.get_content()))
         {
             ZBACKUP_LOG_WARN("Failed to parse login request JSON");
             rsp->set_status_code(zhttp::HttpResponse::StatusCode::BadRequest);
@@ -74,7 +75,7 @@ namespace zbackup
             resp_json["redirect"] = "/index.html";
 
             std::string response_body;
-            JsonUtil::serialize(resp_json, &response_body);
+            util::JsonUtil::serialize(resp_json, &response_body);
 
             rsp->set_status_code(zhttp::HttpResponse::StatusCode::OK);
             rsp->set_status_message("OK");
@@ -90,7 +91,7 @@ namespace zbackup
             resp_json["error"] = "Invalid username or password";
 
             std::string response_body;
-            JsonUtil::serialize(resp_json, &response_body);
+            util::JsonUtil::serialize(resp_json, &response_body);
 
             rsp->set_status_code(zhttp::HttpResponse::StatusCode::Unauthorized);
             rsp->set_status_message("Unauthorized");

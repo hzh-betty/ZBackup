@@ -1,11 +1,12 @@
 #include <utility>
-#include "../../include/util/util.h"
-#include "../../include/core/service_container.h"
-#include "../../../ZHttpServer/include/db_pool/mysql_pool.h"
-#include "../../../ZHttpServer/include/db_pool/redis_pool.h"
-#include "../../include/interfaces/config_manager_interface.h"
+#include "util/util.h"
+#include "core/service_container.h"
+#include "db_pool/mysql_pool.h"
+#include "db_pool/redis_pool.h"
+#include "interfaces/config_manager_interface.h"
+#include "log/backup_logger.h"
 
-namespace zbackup
+namespace zbackup::util
 {
     // 文件工具类构造函数
     FileUtil::FileUtil(std::string pathname) : pathname_(std::move(pathname))
@@ -294,7 +295,7 @@ namespace zbackup
         }
     }
 
-    void InitMysqlPool()
+    void DataBaseInit::InitMysqlPool()
     {
         auto &container = core::ServiceContainer::get_instance();
         auto config = container.resolve<interfaces::IConfigManager>();
@@ -319,7 +320,7 @@ namespace zbackup
                          config->get_int("mysql_pool_size", 10));
     }
 
-    void InitRedisPool()
+    void DataBaseInit::InitRedisPool()
     {
         auto &container = core::ServiceContainer::get_instance();
         auto config = container.resolve<interfaces::IConfigManager>();

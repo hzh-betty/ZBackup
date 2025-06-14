@@ -1,7 +1,7 @@
 #pragma once
-#include "../../interfaces/user_storage_interface.h"
-#include "../../info/user_info.h"
-#include "../../../../ZHttpServer/include/db_pool/mysql_pool.h"
+#include "interfaces/user_storage_interface.h"
+#include "info/user_info.h"
+#include "db_pool/mysql_pool.h"
 
 namespace zbackup::storage
 {

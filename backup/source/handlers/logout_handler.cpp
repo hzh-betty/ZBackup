@@ -1,8 +1,8 @@
-#include "../../include/handlers/logout_handler.h"
-#include "../../include/core/service_container.h"
-#include "../../include/interfaces/auth_manager_interface.h"
-#include "../../include/interfaces/session_manager_interface.h"
-#include "../../include/util/util.h"
+#include "handlers/logout_handler.h"
+#include "core/service_container.h"
+#include "interfaces/auth_manager_interface.h"
+#include "interfaces/session_manager_interface.h"
+#include "util/util.h"
 #include <nlohmann/json.hpp>
 #include <utility>
 
@@ -37,7 +37,7 @@ namespace zbackup
             resp_json["message"] = "Logout successful";
 
             std::string response_body;
-            JsonUtil::serialize(resp_json, &response_body);
+           util::JsonUtil::serialize(resp_json, &response_body);
 
             rsp->set_status_code(zhttp::HttpResponse::StatusCode::OK);
             rsp->set_status_message("OK");
@@ -53,7 +53,7 @@ namespace zbackup
             resp_json["error"] = "Logout failed";
 
             std::string response_body;
-            JsonUtil::serialize(resp_json, &response_body);
+            util::JsonUtil::serialize(resp_json, &response_body);
 
             rsp->set_status_code(zhttp::HttpResponse::StatusCode::InternalServerError);
             rsp->set_status_message("Internal Server Error");
