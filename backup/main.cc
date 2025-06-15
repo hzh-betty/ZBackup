@@ -44,8 +44,11 @@ void setup_dependencies()
     container.register_singleton<zbackup::interfaces::ISessionManager, zbackup::core::SessionService>();
     
     // 5. 注册认证服务（依赖用户管理器和会话管理器）
-    container.register_singleton<zbackup::interfaces::IAuthenticationService, zbackup::core::AuthenticationService>();
-    
+    auto session_manager = container.resolve<zbackup::interfaces::ISessionManager>();
+    container.register_instance<zbackup::interfaces::IAuthenticationService>(
+        std::make_shared<zbackup::core::AuthenticationService>(user_manager, session_manager)
+    );
+
     ZBACKUP_LOG_INFO("Service dependencies configured successfully");
 }
 

@@ -6,29 +6,25 @@
 
 namespace zbackup::core
 {
-    AuthenticationService::AuthenticationService()
+    AuthenticationService::AuthenticationService(interfaces::IUserManager::ptr user_manager, interfaces::ISessionManager::ptr session_manager)
+        : user_manager_(std::move(user_manager)), session_manager_(std::move(session_manager))
     {
+        if (!user_manager_ || !session_manager_)
+        {
+            ZBACKUP_LOG_ERROR("AuthenticationService requires IUserManager and ISessionManager dependencies");
+            throw std::runtime_error("AuthenticationService requires IUserManager and ISessionManager dependencies");
+        }
         ZBACKUP_LOG_DEBUG("AuthenticationService created, dependencies will be resolved on first use");
     }
 
     bool AuthenticationService::authenticate(const zhttp::HttpRequest &req)
     {
-        if (!ensure_dependencies())
-        {
-            return false;
-        }
         return session_manager_->is_valid_session(req);
     }
 
     bool AuthenticationService::login(const std::string &username, const std::string &password,
                                       const zhttp::HttpRequest &req, zhttp::HttpResponse *rsp)
     {
-        if (!ensure_dependencies())
-        {
-            ZBACKUP_LOG_ERROR("Authentication services not available");
-            return false;
-        }
-
         if (!user_manager_->validate_user(username, password))
         {
             ZBACKUP_LOG_WARN("Invalid login attempt for user: {}", username);
@@ -42,11 +38,6 @@ namespace zbackup::core
 
     bool AuthenticationService::logout(const zhttp::HttpRequest &req, zhttp::HttpResponse *rsp)
     {
-        if (!ensure_dependencies())
-        {
-            return false;
-        }
-
         try
         {
             auto username = session_manager_->get_username(req);
@@ -59,34 +50,5 @@ namespace zbackup::core
             ZBACKUP_LOG_ERROR("Error during logout: {}", e.what());
             return false;
         }
-    }
-
-    bool AuthenticationService::ensure_dependencies()
-    {
-        if (!user_manager_ || !session_manager_)
-        {
-            auto &container = ServiceContainer::get_instance();
-
-            if (!user_manager_)
-            {
-                user_manager_ = container.resolve<interfaces::IUserManager>();
-                if (!user_manager_)
-                {
-                    ZBACKUP_LOG_ERROR("Failed to resolve IUserManager");
-                    return false;
-                }
-            }
-
-            if (!session_manager_)
-            {
-                session_manager_ = container.resolve<interfaces::ISessionManager>();
-                if (!session_manager_)
-                {
-                    ZBACKUP_LOG_ERROR("Failed to resolve ISessionManager");
-                    return false;
-                }
-            }
-        }
-        return true;
     }
 }
