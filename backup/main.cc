@@ -25,7 +25,7 @@ void setup_dependencies()
     
     //  2. 初始化数据库连接池（需要配置服务）
     zbackup::util::DataBaseInit::InitMysqlPool();
-    zbackup::util::DataBaseInit::InitMysqlPool();
+    zbackup::util::DataBaseInit::InitRediPool();
 
     // 3. 注册存储层（需要数据库配置）
     container.register_singleton<zbackup::interfaces::IBackupStorage, zbackup::storage::DatabaseBackupStorage>();
