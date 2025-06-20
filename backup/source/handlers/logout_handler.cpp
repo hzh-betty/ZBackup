@@ -8,7 +8,6 @@
 
 namespace zbackup
 {
-    LogoutHandler::LogoutHandler() = default;
 
     void LogoutHandler::handle_request(const zhttp::HttpRequest &req, zhttp::HttpResponse *rsp)
     {

@@ -3,10 +3,10 @@
 
 namespace zbackup
 {
-    class DeleteHandler final : public DataHandler
+    class DeleteHandler final : public BaseHandler
     {
     public:
-        explicit DeleteHandler(interfaces::IDataManager::ptr data_manager);
+        DeleteHandler() = default;
 
         void handle_request(const zhttp::HttpRequest &req, zhttp::HttpResponse *rsp) override;
     };

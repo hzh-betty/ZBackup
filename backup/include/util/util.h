@@ -6,6 +6,8 @@
 #include <filesystem>
 #include <sys/stat.h>
 #include <nlohmann/json.hpp>
+#include "core/config_service.h"
+#include "info/backup_info.h"
 
 namespace zbackup::util
 {
@@ -59,6 +61,8 @@ namespace zbackup::util
         // 初始化Redis连接池
         static void InitRedisPool();
     };
-    // 时间转换函数
+    
+    // 工具函数
     std::string time_to_str(time_t timestamp);
+    std::string get_etag(const info::BackupInfo &info);
 }

@@ -45,9 +45,11 @@ namespace zbackup::core
         // 创建备份目录和压缩目录
         std::string back_dir = get_string("back_dir", "./backup/");
         std::string pack_dir = get_string("pack_dir", "./pack/");
+        std::string data_dir = "./data/";
 
         util::FileUtil back_util(back_dir);
         util::FileUtil pack_util(pack_dir);
+        util::FileUtil data_util(data_dir);
 
         if (!back_util.create_directory())
         {
@@ -56,6 +58,10 @@ namespace zbackup::core
         if (!pack_util.create_directory())
         {
             ZBACKUP_LOG_ERROR("Failed to create pack directory: {}", pack_dir);
+        }
+        if (!data_util.create_directory())
+        {
+            ZBACKUP_LOG_ERROR("Failed to create data directory: {}", data_dir);
         }
     }
 

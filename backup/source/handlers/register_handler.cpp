@@ -3,17 +3,27 @@
 #include <nlohmann/json.hpp>
 #include <utility>
 #include "log/backup_logger.h"
+#include "interfaces/user_manager_interface.h"
+#include "core/service_container.h"
 #include <regex>
 namespace zbackup
 {
-    RegisterHandler::RegisterHandler(interfaces::IUserManager::ptr user_manager)
-        : user_manager_(std::move(user_manager))
-    {
-    }
-
     void RegisterHandler::handle_request(const zhttp::HttpRequest &req, zhttp::HttpResponse *rsp)
     {
         ZBACKUP_LOG_DEBUG("Register request received");
+
+        auto& container = core::ServiceContainer::get_instance();
+        auto user_manager = container.resolve<interfaces::IUserManager>();
+
+        if (!user_manager)
+        {
+            ZBACKUP_LOG_ERROR("UserManager not available");
+            rsp->set_status_code(zhttp::HttpResponse::StatusCode::InternalServerError);
+            rsp->set_status_message("Internal Server Error");
+            rsp->set_content_type("application/json");
+            rsp->set_body(R"({"error": "User service unavailable"})");
+            return;
+        }
 
         std::string content_type = req.get_header("Content-Type");
 
@@ -78,7 +88,7 @@ namespace zbackup
         }
 
         // 注册用户
-        if (user_manager_->register_user(username, password, email))
+        if (user_manager->register_user(username, password, email))
         {
             nlohmann::json resp_json;
             resp_json["success"] = true;

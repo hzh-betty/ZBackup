@@ -3,16 +3,24 @@
 #include "util/util.h"
 #include <nlohmann/json.hpp>
 #include "log/backup_logger.h"
+#include "interfaces/data_manager_interface.h"
+#include "core/service_container.h"
 namespace zbackup
 {
-    DeleteHandler::DeleteHandler(interfaces::IDataManager::ptr data_manager)
-        : DataHandler(std::move(data_manager))
-    {
-        ZBACKUP_LOG_DEBUG("DeleteHandler initialized");
-    }
-
     void DeleteHandler::handle_request(const zhttp::HttpRequest &req, zhttp::HttpResponse *rsp)
     {
+        auto &container = core::ServiceContainer::get_instance();
+        auto data_manager = container.resolve<interfaces::IDataManager>();
+
+        if (!data_manager)
+        {
+            ZBACKUP_LOG_ERROR("DataManager not available for delete operation");
+            rsp->set_status_code(zhttp::HttpResponse::StatusCode::InternalServerError);
+            rsp->set_status_message("Internal Server Error");
+            rsp->set_body("Service unavailable");
+            return;
+        }
+
         // 从查询参数中获取要删除的文件URL
         std::string file_url = req.get_query_parameters("file");
         if (file_url.empty()) {
@@ -30,7 +38,7 @@ namespace zbackup
         ZBACKUP_LOG_INFO("Delete request for file: {}", file_url);
 
         info::BackupInfo info;
-        if (!data_manager_->get_one_by_url(file_url, &info))
+        if (!data_manager->get_one_by_url(file_url, &info))
         {
             ZBACKUP_LOG_WARN("File not found for deletion: {}", file_url);
             rsp->set_status_code(zhttp::HttpResponse::StatusCode::NotFound);
@@ -58,7 +66,7 @@ namespace zbackup
             }
         }
 
-        if (!data_manager_->delete_one(info))
+        if (!data_manager->delete_one(info))
         {
             ZBACKUP_LOG_ERROR("Failed to delete backup info from database: {}", file_url);
             rsp->set_status_code(zhttp::HttpResponse::StatusCode::InternalServerError);
@@ -67,7 +75,7 @@ namespace zbackup
             return;
         }
 
-        if (!data_manager_->persistence())
+        if (!data_manager->persistence())
         {
             ZBACKUP_LOG_ERROR("Failed to persist data after deletion: {}", file_url);
         }

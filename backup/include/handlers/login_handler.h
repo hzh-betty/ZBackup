@@ -1,6 +1,5 @@
 #pragma once
 #include "base_handler.h"
-#include "interfaces/user_manager_interface.h"
 
 namespace zbackup
 {
@@ -8,11 +7,8 @@ namespace zbackup
     class LoginHandler final : public BaseHandler
     {
     public:
-        explicit LoginHandler(interfaces::IUserManager::ptr user_manager);
+        LoginHandler() = default;
 
         void handle_request(const zhttp::HttpRequest &req, zhttp::HttpResponse *rsp) override;
-
-    private:
-        interfaces::IUserManager::ptr user_manager_;
     };
 }

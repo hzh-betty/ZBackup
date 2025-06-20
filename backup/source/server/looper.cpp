@@ -13,7 +13,7 @@ namespace zbackup
     BackupLooper::BackupLooper(interfaces::ICompress::ptr comp)
         : stop_(false), comp_(std::move(comp))
     {
-        ZBACKUP_LOG_INFO("BackupLooper initialized");
+        ZBACKUP_LOG_INFO("BackupLooper initialized with compressor");
     }
 
     void BackupLooper::start() const

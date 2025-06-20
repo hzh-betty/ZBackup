@@ -3,16 +3,11 @@
 #include "handlers/download_handler.h"
 #include "compress/snappy_compress.h"
 #include "log/backup_logger.h"
+#include "interfaces/data_manager_interface.h"
+#include "core/service_container.h"
 
 namespace zbackup
 {
-    // 下载处理器构造函数
-    DownloadHandler::DownloadHandler(interfaces::IDataManager::ptr data_manager, 
-                                   interfaces::ICompress::ptr comp) 
-        : CompressHandler(std::move(data_manager), std::move(comp))
-    {
-        ZBACKUP_LOG_DEBUG("DownloadHandler initialized");
-    }
 
     // 处理文件下载请求，支持断点续传
     void DownloadHandler::handle_request(const zhttp::HttpRequest &req, zhttp::HttpResponse *rsp)
@@ -20,9 +15,22 @@ namespace zbackup
         std::string url_path = req.get_path();
         ZBACKUP_LOG_DEBUG("Download request: {}", url_path);
 
+        auto &container = core::ServiceContainer::get_instance();
+        auto data_manager = container.resolve<interfaces::IDataManager>();
+        auto compressor = container.resolve<interfaces::ICompress>();
+
+        if (!data_manager || !compressor)
+        {
+            ZBACKUP_LOG_ERROR("Required services not available for download");
+            rsp->set_status_code(zhttp::HttpResponse::StatusCode::InternalServerError);
+            rsp->set_status_message("Internal Server Error");
+            rsp->set_body("Service unavailable");
+            return;
+        }
+
         // 根据URL获取文件备份信息
         info::BackupInfo info;
-        if (data_manager_->get_one_by_url(url_path, &info) == false)
+        if (data_manager->get_one_by_url(url_path, &info) == false)
         {
             ZBACKUP_LOG_WARN("File not found for download: {}", url_path);
             rsp->set_status_code(zhttp::HttpResponse::StatusCode::NotFound);
@@ -36,7 +44,7 @@ namespace zbackup
         {
             ZBACKUP_LOG_INFO("Decompressing file for download: {}", info.real_path_);
             // 解压缩文件
-            if (comp_->un_compress(info.real_path_, info.pack_path_) == false)
+            if (compressor->un_compress(info.real_path_, info.pack_path_) == false)
             {
                 ZBACKUP_LOG_ERROR("Failed to decompress file: {}", info.pack_path_);
                 rsp->set_status_code(zhttp::HttpResponse::StatusCode::InternalServerError);
@@ -53,11 +61,11 @@ namespace zbackup
             }
 
             info.pack_flag_ = false;
-            if (data_manager_->update(info) == false)
+            if (data_manager->update(info) == false)
             {
                 ZBACKUP_LOG_WARN("Failed to update backup info after decompression: {}", info.real_path_);
             }
-            if (data_manager_->persistence() == false)
+            if (data_manager->persistence() == false)
             {
                 ZBACKUP_LOG_ERROR("Failed to persist backup info after decompression: {}", info.real_path_);
                 rsp->set_status_code(zhttp::HttpResponse::StatusCode::InternalServerError);
@@ -74,7 +82,7 @@ namespace zbackup
         std::string old_etag = req.get_header("If-Range");
 
         // 处理断点续传请求
-        if (!range_header.empty() && range_header.find("bytes=") == 0 && old_etag == get_etag(info))
+        if (!range_header.empty() && range_header.find("bytes=") == 0 && old_etag == util::get_etag(info))
         {
             handle_range_request(req, rsp, info, fu, file_size, range_header);
             return;
@@ -148,7 +156,7 @@ namespace zbackup
         rsp->set_content_type("application/octet-stream");
         rsp->set_body(file_content);
         rsp->set_header("Accept-Ranges", "bytes");
-        rsp->set_header("ETag", get_etag(info));
+        rsp->set_header("ETag", util::get_etag(info));
         rsp->set_header("Content-Range",
                         "bytes " + std::to_string(start) + "-" + std::to_string(end) + "/" + std::to_string(file_size));
         rsp->set_content_length(len);
@@ -173,7 +181,7 @@ namespace zbackup
         rsp->set_content_type("application/octet-stream");
         rsp->set_body(file_content);
         rsp->set_header("Accept-Ranges", "bytes");
-        rsp->set_header("ETag", get_etag(info));
+        rsp->set_header("ETag", util::get_etag(info));
         rsp->set_content_length(file_content.size());
 
         ZBACKUP_LOG_INFO("Full download completed: {} ({} bytes)", info.real_path_, file_content.size());

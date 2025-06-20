@@ -1,21 +1,18 @@
 #include <utility>
 #include "interfaces/config_manager_interface.h"
 #include "interfaces/storage_interface.h"
+#include "interfaces/data_manager_interface.h"
+#include "core/service_container.h"
 #include "handlers/upload_handler.h"
 #include "core/service_container.h"
 #include "util/util.h"
 #include <nlohmann/json.hpp>
 #include "log/backup_logger.h"
 #include <regex>
+#include "interfaces/data_manager_interface.h"
 
 namespace zbackup
 {
-    UploadHandler::UploadHandler(interfaces::IDataManager::ptr data_manager)
-        : DataHandler(std::move(data_manager))
-    {
-        ZBACKUP_LOG_DEBUG("UploadHandler initialized");
-    }
-
     void UploadHandler::handle_request(const zhttp::HttpRequest &req, zhttp::HttpResponse *rsp)
     {
         std::string filename;
@@ -127,10 +124,11 @@ namespace zbackup
     {
         auto &container = core::ServiceContainer::get_instance();
         auto config = container.resolve<interfaces::IConfigManager>();
+        auto data_manager = container.resolve<interfaces::IDataManager>();
 
-        if (!config)
+        if (!config || !data_manager)
         {
-            ZBACKUP_LOG_ERROR("ConfigManager not available for file save");
+            ZBACKUP_LOG_ERROR("Required services not available for file save");
             return false;
         }
 
@@ -151,7 +149,7 @@ namespace zbackup
             return false;
         }
 
-        if (data_manager_->insert(info) == false)
+        if (data_manager->insert(info) == false)
         {
             ZBACKUP_LOG_ERROR("Failed to insert backup info for: {}", real_path);
             return false;

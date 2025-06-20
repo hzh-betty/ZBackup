@@ -295,74 +295,76 @@ namespace zbackup::util
         }
     }
 
-    class DataBaseInit
+    // 初始化MySQL连接池 - 增强版本
+    void DataBaseInit::InitMysqlPool()
     {
-    public:
-        // 初始化MySQL连接池 - 增强版本
-        static void InitMysqlPool()
+        auto &container = core::ServiceContainer::get_instance();
+        auto config = container.resolve<interfaces::IConfigManager>();
+        
+        if (!config)
         {
-            auto &container = core::ServiceContainer::get_instance();
-            auto config = container.resolve<interfaces::IConfigManager>();
-            
-            if (!config) {
-                ZBACKUP_LOG_FATAL("ConfigManager not available for MySQL pool initialization");
-                throw std::runtime_error("ConfigManager not found in service container");
-            }
-
-            try {
-                auto &pool = zhttp::zdb::MysqlConnectionPool::get_instance();
-                pool.init(
-                    config->get_string("mysql_host", "localhost"),
-                    config->get_string("mysql_user", "root"),
-                    config->get_string("mysql_password", ""),
-                    config->get_string("mysql_db", "zbackup"),
-                    config->get_int("mysql_pool_size", 10));
-                ZBACKUP_LOG_INFO("MySQL connection pool init success: {}@{}:{}/{} pool_size={}",
-                                 config->get_string("mysql_user", "root"),
-                                 config->get_string("mysql_host", "localhost"),
-                                 config->get_int("mysql_port", 3306),
-                                 config->get_string("mysql_db", "zbackup"),
-                                 config->get_int("mysql_pool_size", 10));
-            }
-            catch (const std::exception& e) {
-                ZBACKUP_LOG_FATAL("Failed to initialize MySQL pool: {}", e.what());
-                throw;
-            }
+            ZBACKUP_LOG_FATAL("ConfigManager not available for MySQL pool initialization");
+            throw std::runtime_error("ConfigManager not found in service container");
         }
 
-        // 初始化Redis连接池 - 增强版本
-        static void InitRedisPool()
+        try
         {
-            auto &container = core::ServiceContainer::get_instance();
-            auto config = container.resolve<interfaces::IConfigManager>();
-            
-            if (!config) {
-                ZBACKUP_LOG_FATAL("ConfigManager not available for Redis pool initialization");
-                throw std::runtime_error("ConfigManager not found in service container");
-            }
-
-            try {
-                auto &pool = zhttp::zdb::RedisConnectionPool::get_instance();
-                pool.init(
-                    config->get_string("redis_host", "127.0.0.1"),
-                    config->get_int("redis_port", 6379),
-                    config->get_string("redis_password", ""),
-                    config->get_int("redis_db", 0),
-                    config->get_int("redis_pool_size", 10),
-                    config->get_int("redis_timeout_ms", 5000));
-                ZBACKUP_LOG_INFO("Redis connection pool init success: {}:{} db={} pool_size={} timeout_ms={}",
-                                 config->get_string("redis_host", "127.0.0.1"),
-                                 config->get_int("redis_port", 6379),
-                                 config->get_int("redis_db", 0),
-                                 config->get_int("redis_pool_size", 10),
-                                 config->get_int("redis_timeout_ms", 5000));
-            }
-            catch (const std::exception& e) {
-                ZBACKUP_LOG_FATAL("Failed to initialize Redis pool: {}", e.what());
-                throw;
-            }
+            auto &pool = zhttp::zdb::MysqlConnectionPool::get_instance();
+            pool.init(
+                config->get_string("mysql_host", "localhost"),
+                config->get_string("mysql_user", "root"),
+                config->get_string("mysql_password", ""),
+                config->get_string("mysql_db", "zbackup"),
+                config->get_int("mysql_pool_size", 10));
+            ZBACKUP_LOG_INFO("MySQL connection pool init success: {}@{}:{}/{} pool_size={}",
+                             config->get_string("mysql_user", "root"),
+                             config->get_string("mysql_host", "localhost"),
+                             config->get_int("mysql_port", 3306),
+                             config->get_string("mysql_db", "zbackup"),
+                             config->get_int("mysql_pool_size", 10));
         }
-    };
+        catch (const std::exception &e)
+        {
+            ZBACKUP_LOG_FATAL("Failed to initialize MySQL pool: {}", e.what());
+            throw;
+        }
+    }
+
+    // 初始化Redis连接池
+    void DataBaseInit::InitRedisPool()
+    {
+        auto &container = core::ServiceContainer::get_instance();
+        auto config = container.resolve<interfaces::IConfigManager>();
+
+        if (!config)
+        {
+            ZBACKUP_LOG_FATAL("ConfigManager not available for Redis pool initialization");
+            throw std::runtime_error("ConfigManager not found in service container");
+        }
+
+        try
+        {
+            auto &pool = zhttp::zdb::RedisConnectionPool::get_instance();
+            pool.init(
+                config->get_string("redis_host", "127.0.0.1"),
+                config->get_int("redis_port", 6379),
+                config->get_string("redis_password", ""),
+                config->get_int("redis_db", 0),
+                config->get_int("redis_pool_size", 10),
+                config->get_int("redis_timeout_ms", 5000));
+            ZBACKUP_LOG_INFO("Redis connection pool init success: {}:{} db={} pool_size={} timeout_ms={}",
+                             config->get_string("redis_host", "127.0.0.1"),
+                             config->get_int("redis_port", 6379),
+                             config->get_int("redis_db", 0),
+                             config->get_int("redis_pool_size", 10),
+                             config->get_int("redis_timeout_ms", 5000));
+        }
+        catch (const std::exception &e)
+        {
+            ZBACKUP_LOG_FATAL("Failed to initialize Redis pool: {}", e.what());
+            throw;
+        }
+    }
 
     std::string time_to_str(time_t timestamp)
     {
@@ -371,4 +373,10 @@ namespace zbackup::util
         strftime(buffer, sizeof(buffer), "%Y-%m-%d %H:%M:%S", time_info);
         return std::string(buffer);
     }
-} // namespace zbackup
+
+    std::string get_etag(const info::BackupInfo &info)
+    {
+        std::string etag = info.real_path_ + std::to_string(info.fsize_) + std::to_string(info.mtime_);
+        return std::to_string(std::hash<std::string>{}(etag));
+    }
+} // namespace zbackup::util

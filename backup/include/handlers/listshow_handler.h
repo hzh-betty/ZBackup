@@ -3,10 +3,10 @@
 
 namespace zbackup
 {
-    class ListShowHandler final : public DataHandler
+    class ListShowHandler final : public BaseHandler
     {
     public:
-        explicit ListShowHandler(interfaces::IDataManager::ptr data_manager);
+        ListShowHandler() = default;
 
         void handle_request(const zhttp::HttpRequest &req, zhttp::HttpResponse *rsp) override;
     };

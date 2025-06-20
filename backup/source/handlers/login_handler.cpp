@@ -8,11 +8,6 @@
 
 namespace zbackup
 {
-    LoginHandler::LoginHandler(interfaces::IUserManager::ptr user_manager)
-        : user_manager_(std::move(user_manager))
-    {
-    }
-
     void LoginHandler::handle_request(const zhttp::HttpRequest &req, zhttp::HttpResponse *rsp)
     {
         ZBACKUP_LOG_DEBUG("Login request received from {}", req.get_header("X-Real-IP"));
