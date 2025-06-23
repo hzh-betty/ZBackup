@@ -1,3 +1,8 @@
+/**
+ * @file file_user_storage.cpp
+ * @brief 文件用户存储实现，将用户信息存储在JSON文件中
+ */
+
 #include "storage/file/file_user_storage.h"
 #include "core/service_container.h"
 #include "interfaces/config_manager_interface.h"
@@ -7,30 +12,42 @@
 
 namespace zbackup::storage
 {
+    /**
+     * @brief 构造函数，初始化文件存储
+     */
     FileUserStorage::FileUserStorage()
     {
+        // 1. 从服务容器获取配置
         auto &container = core::ServiceContainer::get_instance();
         auto config = container.resolve<interfaces::IConfigManager>();
         user_file_ = config->get_string("user_file", "./data/users.dat");
 
-        // 确保数据目录存在
+        // 2. 确保数据目录存在
         util::FileUtil data_dir("./data/");
         data_dir.create_directory();
 
+        // 3. 加载现有数据
         init_load();
         ZBACKUP_LOG_INFO("FileUserStorage initialized with file: {}", user_file_);
     }
 
+    /**
+     * @brief 插入用户信息
+     * @param info 用户信息
+     * @return 插入成功返回true，失败返回false
+     */
     bool FileUserStorage::insert(const info::UserInfo &info)
     {
         std::lock_guard<std::mutex> lock(file_mutex_);
+        
+        // 1. 检查用户名是否已存在
         if (users_.find(info.username_) != users_.end())
         {
             ZBACKUP_LOG_WARN("User already exists: {}", info.username_);
             return false;
         }
 
-        // 检查邮箱是否已存在
+        // 2. 检查邮箱是否已存在
         for (const auto &pair : users_)
         {
             if (pair.second.email_ == info.email_)
@@ -40,6 +57,7 @@ namespace zbackup::storage
             }
         }
 
+        // 3. 插入用户并保存到文件
         users_[info.username_] = info;
         bool result = save_to_file();
         if (result)
@@ -148,15 +166,22 @@ namespace zbackup::storage
         return false;
     }
 
+    /**
+     * @brief 从文件加载用户数据
+     * @return 加载成功返回true，失败返回false
+     */
     bool FileUserStorage::init_load()
     {
         util::FileUtil fu(user_file_);
+        
+        // 1. 检查文件是否存在
         if (!fu.exists())
         {
             ZBACKUP_LOG_INFO("User file not found, starting with empty storage: {}", user_file_);
             return true;
         }
 
+        // 2. 读取文件内容
         std::string body;
         if (!fu.get_content(&body))
         {
@@ -170,6 +195,7 @@ namespace zbackup::storage
             return true;
         }
 
+        // 3. 解析JSON数据
         nlohmann::json root;
         if (!util::JsonUtil::deserialize(&root, body))
         {
@@ -177,6 +203,7 @@ namespace zbackup::storage
             return false;
         }
 
+        // 4. 加载用户数据
         for (const auto &item : root)
         {
             info::UserInfo user;
@@ -191,8 +218,13 @@ namespace zbackup::storage
         return true;
     }
 
+    /**
+     * @brief 保存用户数据到文件
+     * @return 保存成功返回true，失败返回false
+     */
     bool FileUserStorage::save_to_file()
     {
+        // 1. 构建JSON数组
         nlohmann::json root = nlohmann::json::array();
 
         for (const auto &pair : users_)
@@ -206,6 +238,7 @@ namespace zbackup::storage
             root.push_back(item);
         }
 
+        // 2. 序列化JSON
         std::string body;
         if (!util::JsonUtil::serialize(root, &body))
         {
@@ -213,6 +246,7 @@ namespace zbackup::storage
             return false;
         }
 
+        // 3. 写入文件
         util::FileUtil fu(user_file_);
         if (!fu.set_content(body))
         {

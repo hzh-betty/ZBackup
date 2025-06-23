@@ -1,17 +1,31 @@
+/**
+ * @file database_user_storage.cpp
+ * @brief 数据库用户存储实现，负责用户信息的数据库操作
+ */
+
 #include "storage/database/database_user_storage.h"
 #include "log/backup_logger.h"
 
 
 namespace zbackup::storage
 {
+    /**
+     * @brief 构造函数，初始化数据库表
+     */
     DatabaseUserStorage::DatabaseUserStorage()
     {
         create_table_if_not_exists();
         ZBACKUP_LOG_INFO("DatabaseUserStorage initialized");
     }
 
+    /**
+     * @brief 插入用户信息到数据库
+     * @param info 用户信息
+     * @return 插入成功返回true，失败返回false
+     */
     bool DatabaseUserStorage::insert(const info::UserInfo &info)
     {
+        // 1. 获取数据库连接
         auto &pool = zhttp::zdb::MysqlConnectionPool::get_instance();
         auto conn = pool.get_connection();
         if (!conn)
@@ -22,9 +36,9 @@ namespace zbackup::storage
 
         try
         {
-            std::string sql = "INSERT INTO users (username, password_hash, email, created_at) VALUES (?, ?, ?, ?)";
-            auto result = conn->execute_update(sql, info.username_, info.password_hash_,
-                                               info.email_, info.created_at_);
+            // 2. 执行插入SQL，created_at使用当前时间戳
+            std::string sql = "INSERT INTO users (username, password_hash, email) VALUES (?, ?, ?)";
+            auto result = conn->execute_update(sql, info.username_, info.password_hash_, info.email_);
 
             if (result > 0)
             {
@@ -40,6 +54,11 @@ namespace zbackup::storage
         }
     }
 
+    /**
+     * @brief 更新用户信息
+     * @param info 用户信息
+     * @return 更新成功返回true，失败返回false
+     */
     bool DatabaseUserStorage::update(const info::UserInfo &info)
     {
         auto &pool = zhttp::zdb::MysqlConnectionPool::get_instance();
@@ -158,6 +177,12 @@ namespace zbackup::storage
         return result;
     }
 
+    /**
+     * @brief 根据用户名查询用户信息
+     * @param username 用户名
+     * @param user 用户信息输出参数
+     * @return 查询成功返回true，失败返回false
+     */
     bool DatabaseUserStorage::get_by_username(const std::string &username, info::UserInfo *user)
     {
         auto &pool = zhttp::zdb::MysqlConnectionPool::get_instance();
@@ -170,6 +195,7 @@ namespace zbackup::storage
 
         try
         {
+            // 查询时包含created_at字段
             std::string sql = "SELECT username, password_hash, email, created_at FROM users WHERE username=?";
             auto result = conn->execute_query(sql, username);
 
@@ -193,6 +219,12 @@ namespace zbackup::storage
         }
     }
 
+    /**
+     * @brief 根据邮箱查询用户信息
+     * @param email 邮箱
+     * @param user 用户信息输出参数
+     * @return 查询成功返回true，失败返回false
+     */
     bool DatabaseUserStorage::get_by_email(const std::string &email, info::UserInfo *user)
     {
         auto &pool = zhttp::zdb::MysqlConnectionPool::get_instance();
@@ -228,6 +260,10 @@ namespace zbackup::storage
         }
     }
 
+    /**
+     * @brief 创建用户表（如果不存在）
+     * @return 创建成功返回true，失败返回false
+     */
     bool DatabaseUserStorage::create_table_if_not_exists()
     {
         auto &pool = zhttp::zdb::MysqlConnectionPool::get_instance();
@@ -240,13 +276,14 @@ namespace zbackup::storage
 
         try
         {
+            // 修复表结构：created_at设置默认值为CURRENT_TIMESTAMP
             std::string sql = R"(
                 CREATE TABLE IF NOT EXISTS users (
                     id INT AUTO_INCREMENT PRIMARY KEY,
                     username VARCHAR(50) NOT NULL UNIQUE,
                     password_hash VARCHAR(255) NOT NULL,
                     email VARCHAR(100) NOT NULL UNIQUE,
-                    created_at VARCHAR(50) NOT NULL,
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
                     INDEX idx_username (username),
                     INDEX idx_email (email)
